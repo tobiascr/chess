@@ -669,15 +669,15 @@ class Pawn:
 
 class GameState:
 
-    def __init__(self, fen_string):
+    def __init__(self, FEN_string):
 
         # The pieces are stored in the board dictionary at keys that corresponds
         # to their position. Positions with no pieces have the value None.
         self.board = {p:None for p in range(64)}
 
         # Decode the FEN string.
-        fen_fields = fen_string.split(" ")
-        rows = fen_fields[0].split("/")
+        FEN_fields = FEN_string.split(" ")
+        rows = FEN_fields[0].split("/")
         rows.reverse()
         for row in range(8):
             i = 0
@@ -712,14 +712,14 @@ class GameState:
                 else:
                     position += 1
 
-        self.white_to_play = fen_fields[1] == "w"
+        self.white_to_play = FEN_fields[1] == "w"
 
         # Information of whether the kings and rooks have been moved are
         # stored in this variable.
-        self.castling_possibilities = fen_fields[2]
+        self.castling_possibilities = FEN_fields[2]
 
-        if fen_fields[3] != "-":
-            self.en_passant_target_square = convert_position_to_engine_format(fen_fields[3])
+        if FEN_fields[3] != "-":
+            self.en_passant_target_square = convert_position_to_engine_format(FEN_fields[3])
         else:
             self.en_passant_target_square = None
         self.en_passant_target_square_history = []
@@ -779,6 +779,41 @@ class GameState:
         self.en_passant_target_square = self.en_passant_target_square_history.pop()
         self.white_to_play = not self.white_to_play
 
+    def check(self):
+        """Return True if the king of the player in turn is in check and
+        False if not.
+        """
+        nullmove = Move()
+        self.make_move(nullmove)
+        result = abs(minimax_value(game_state, 1)) > 500
+        self.undo_move(nullmove)
+        return result
+
+    def check_mate(self):
+        """Return True if the game state is a check mate and False if not."""
+        if not self.check():
+            return False
+        moves = self.possible_moves()
+        for move in moves:
+            self.make_move(move)
+            if abs(minimax_value(game_state, 1)) < 500:
+                self.undo_move(move)
+                return False
+            self.undo_move(move)
+        return True
+
+    def stale_mate(self):
+        """Return True if the game state is a stale mate and False if not."""
+        if self.check():
+            return False
+        moves = self.possible_moves()
+        for move in moves:
+            self.make_move(move)
+            if abs(minimax_value(game_state, 1)) < 500:
+                self.undo_move(move)
+                return False
+            self.undo_move(move)
+        return True
 
 def minimax_value(game_state, depth):
     """This function uses the minimax algorithm to analyze a game state.
@@ -855,6 +890,46 @@ def make_move_from_text_input(game_state):
                     return True
         print("The move is not possible.\n")
 
+def computer_move(game_state):
+    """Return a move, one exists that is computed with the minimax algorithm.
+    If several moves are found to be equally good, a randomly choosen move of them
+    is returned."""
+
+    moves = game_state.possible_moves()
+    depth = 2
+    best_moves = []
+
+    if moves == []:
+        return None
+
+    # If maximizing player.
+    if game_state.white_to_play:
+        best_value = -10000
+        for move in moves:
+            game_state.make_move(move)
+            value = minimax_value(game_state, depth)
+            if value == best_value:
+                best_moves.append(move)
+            if value > best_value:
+                best_moves = [move]
+                best_value = value
+            game_state.undo_move(move)
+
+    # If minimizing player.
+    else:
+        best_value = 10000
+        for move in moves:
+            game_state.make_move(move)
+            value = minimax_value(game_state, depth)
+            if value == best_value:
+                best_moves.append(move)
+            if value < best_value:
+                best_moves = [move]
+                best_value = value
+            game_state.undo_move(move)
+
+    return random.choice(best_moves)
+
 if __name__ == '__main__':
 
     def print_board(game_state):
@@ -917,59 +992,82 @@ if __name__ == '__main__':
     #game_state = GameState("2k5/4r3/5P2/8/8/8/8/3K4 w - -")
     #game_state = GameState("2k5/8/8/1r6/P7/8/8/3K4 w - -")
     #game_state = GameState("2k5/8/4p3/1r3Bp1/P4n2/4P2q/2P3P1/3K4 w - -")
-    game_state = GameState("1k6/3PP3/2P2PP1/8/2p2p2/3p4/4p1p1/1K6 w - -")
+    #game_state = GameState("1k6/3PP3/2P2PP1/8/2p2p2/3p4/4p1p1/1K6 w - -")
+    #game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+    #game_state = GameState("8/3K4/8/8/3r4/8/8/1k6 w - -") # Check
+    #game_state = GameState("8/3K4/8/8/8/8/3N4/1k6 b - -") # Check
+    #game_state = GameState("8/1Q1K4/R7/8/8/k7/8/8 b - -") # Check mate
+    #game_state = GameState("8/1Q1K4/R7/8/8/k7/8/4b3 b - -") # Check
+    #game_state = GameState("K7/P2n4/1n6/8/8/k4b2/8/8 w - -") # Check mate
+    #game_state = GameState("K7/P2n4/b7/8/8/k7/8/8 w - -") # Stale mate
+    #game_state = GameState("K7/P7/5N2/8/8/4k3/R7/3R1R2 b - -") # Stale mate
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+    #game_state = GameState("")
+
+    #print(minimax_value(game_state, 2))
+#    print(game_state)
+#    print("Check:", game_state.check())
+#    print("Check mate:", game_state.check_mate())
+#    print("Stale mate:", game_state.stale_mate())
+#    move = computer_move(game_state)
+#    game_state.make_move(move)
+#    print(game_state)
+#    print(move)
+
+#    print(game_state)
+#    for n in range(100):
+#        make_random_move(game_state)
+#        print("Position value: ", game_state.value)
+
+    # The engine play against itself.
     game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-
-    print(minimax_value(game_state, 2))
-
     print(game_state)
-    for n in range(100):
-        make_random_move(game_state)
+    for n in range(200):
+        move = computer_move(game_state)
+        game_state.make_move(move)
+        print(game_state)
+        print(move)
         print("Position value: ", game_state.value)
+        if game_state.check_mate():
+            print("Check mate")
+            break
+        if game_state.stale_mate():
+            print("Stale mate")
+            break
 
 #    for n in range(100):
 #        moves = game_state.possible_moves()
