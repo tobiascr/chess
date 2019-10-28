@@ -873,22 +873,19 @@ def make_move_from_text_input(game_state):
     """Ask the user for a move and make that move. The move can be expressed in the UCI long
     algebraic notation. Return true if a move is given. Return False if the input
     is q."""
-    while True:
-        player_input = input("Your move: ")
-        if player_input == "q":
-            return False
-        from_position = convert_position_to_engine_format(player_input[0:2])
-        to_position = convert_position_to_engine_format(player_input[2:4])
-        piece = game_state.board[from_position]
-        # Check if the move is legal.
-        if piece: # If there is a piece at the from position.
-            if piece.white == game_state.white_to_play: # If the piece have the right color.
-                if to_position in piece.possible_moves(game_state, from_position):
-                    piece = game_state.board[from_position]
-                    game_state.make_move(from_position, to_position)
-                    print()
-                    return True
-        print("The move is not possible.\n")
+    player_input = input("Your move: ")
+    if player_input == "q":
+        return False
+    from_position = convert_position_to_engine_format(player_input[0:2])
+    to_position = convert_position_to_engine_format(player_input[2:4])
+    piece = game_state.board[from_position]
+    move = Move()
+    move.add_change(from_position, game_state.board[from_position], None)
+    move.add_change(to_position, game_state.board[to_position],
+                    game_state.board[from_position])
+    # En passant? Castling?
+    game_state.make_move(move)
+    return True
 
 def computer_move(game_state):
     """Return a move, one exists that is computed with the minimax algorithm.
@@ -896,7 +893,7 @@ def computer_move(game_state):
     is returned."""
 
     moves = game_state.possible_moves()
-    depth = 2
+    depth = 3
     best_moves = []
 
     if moves == []:
@@ -932,10 +929,6 @@ def computer_move(game_state):
 
 if __name__ == '__main__':
 
-    def print_board(game_state):
-        print(game_state)
-        print()
-
     game_state = GameState("1q1q1k2/4q3/8/8/8/8/8/2K2QQQ w - -")
 
     # Standard starting position.
@@ -943,26 +936,54 @@ if __name__ == '__main__':
     #print(game_state)
     #print()
 
-    game_state = GameState("r1bqk2r/ppp1bppp/2np1n2/4p3/2B1P3/P1N2N2/1PPP1PPP/R1BQK2R w KQkq -")
+    #game_state = GameState("r1bqk2r/ppp1bppp/2np1n2/4p3/2B1P3/P1N2N2/1PPP1PPP/R1BQK2R w KQkq -")
     #print(game_state)
     #print()
 
     # Empty position.
-    game_state = GameState("8/8/8/8/8/8/8/8 w - -")
+    #game_state = GameState("8/8/8/8/8/8/8/8 w - -")
     #print(game_state)
     #print()
 
 #    game_state = GameState("7r/r7/2K2k2/NNn1R3/8/8/8/R7 w - -")
 
-#    print()
-#    print("Type q to quit.")
-#    print()
-#    print_board(game_state)
-#    while True:
-#        print("Position value: ", game_state.value)
-#        if not make_move_from_text_input(game_state):
-#            break
-#        make_random_move(game_state)
+    print()
+    print("Type q to quit.")
+    print()
+    print(game_state)
+    print()
+    while True:
+        if not make_move_from_text_input(game_state):
+            break
+        if game_state.check_mate():
+            print(game_state)
+            if game_state.white_to_play:
+                print("Black win")
+            else:
+                print("White win")
+            print("Check mate")
+            break
+        if game_state.stale_mate():
+            print(game_state)
+            print("Stale mate")
+            break
+
+        move = computer_move(game_state)
+        game_state.make_move(move)
+        print(game_state)
+        print(move)
+        print("Position value: ", game_state.value)
+
+        if game_state.check_mate():
+            if game_state.white_to_play:
+                print("Black win")
+            else:
+                print("White win")
+            print("Check mate")
+            break
+        if game_state.stale_mate():
+            print("Stale mate")
+            break
 
     #game_state = GameState("8/8/8/3k4/8/3K4/8/8 w - -")
     #game_state = GameState("8/6n1/8/3k4/8/3K4/8/N7 w - -")
@@ -1036,45 +1057,27 @@ if __name__ == '__main__':
     #game_state = GameState("")
     #game_state = GameState("")
     #game_state = GameState("")
-    #game_state = GameState("")
-
-    #print(minimax_value(game_state, 2))
-#    print(game_state)
-#    print("Check:", game_state.check())
-#    print("Check mate:", game_state.check_mate())
-#    print("Stale mate:", game_state.stale_mate())
-#    move = computer_move(game_state)
-#    game_state.make_move(move)
-#    print(game_state)
-#    print(move)
-
-#    print(game_state)
-#    for n in range(100):
-#        make_random_move(game_state)
-#        print("Position value: ", game_state.value)
 
     # The engine play against itself.
-    game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-    print(game_state)
-    for n in range(200):
-        move = computer_move(game_state)
-        game_state.make_move(move)
-        print(game_state)
-        print(move)
-        print("Position value: ", game_state.value)
-        if game_state.check_mate():
-            print("Check mate")
-            break
-        if game_state.stale_mate():
-            print("Stale mate")
-            break
-
-#    for n in range(100):
-#        moves = game_state.possible_moves()
-#        move = random.choice(moves)
+#    game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+#    print(game_state)
+#    for n in range(200):
+#        move = computer_move(game_state)
 #        game_state.make_move(move)
 #        print(game_state)
 #        print(move)
+#        print("Position value: ", game_state.value)
+#        if game_state.check_mate():
+#            if game_state.white_to_play:
+#                print("Black win")
+#            else:
+#                print("White win")
+#            print("Check mate")
+#            break
+#        if game_state.stale_mate():
+#            print("Stale mate")
+#            break
+
 
 
 
