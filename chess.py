@@ -739,8 +739,8 @@ class GameState:
                " | " + " | ".join(rows[7-i]) + " |" + "\n   +" + "---+"*8
                for i in range(8)]) + "\n     a   b   c   d   e   f   g   h"
 
-    def possible_moves(self):
-        """Return a list of Move-objects corresponding to all possible moves
+    def pseudo_legal_moves_no_castlings(self):
+        """Return a list of Move-objects corresponding to all possible pseudo-legal moves
         in this position, except for castlings."""
         move_list = []
         for position in range(64):
@@ -749,7 +749,19 @@ class GameState:
             if piece:
                 # If the piece have the right color.
                 if piece.white == self.white_to_play:
-                    move_list += piece.possible_moves(game_state, position)
+                    move_list += piece.possible_moves(self, position)
+        return move_list
+
+    def legal_moves_no_castlings(self):
+        """Return a list of Move-objects corresponding to all possible legal moves
+        in this position, except for castlings."""
+        move_list = []
+        moves = self.pseudo_legal_moves_no_castlings()
+        for move in moves:
+            self.make_move(move)
+            if abs(minimax_value(self, 1)) < 500:
+                move_list.append(move)
+            self.undo_move(move)
         return move_list
 
     def make_move(self, move):
@@ -785,35 +797,18 @@ class GameState:
         """
         nullmove = Move()
         self.make_move(nullmove)
-        result = abs(minimax_value(game_state, 1)) > 500
+        result = abs(minimax_value(self, 1)) > 500
         self.undo_move(nullmove)
         return result
 
     def check_mate(self):
         """Return True if the game state is a check mate and False if not."""
-        if not self.check():
-            return False
-        moves = self.possible_moves()
-        for move in moves:
-            self.make_move(move)
-            if abs(minimax_value(game_state, 1)) < 500:
-                self.undo_move(move)
-                return False
-            self.undo_move(move)
-        return True
+        return self.check() and self.legal_moves_no_castlings() == []
 
     def stale_mate(self):
         """Return True if the game state is a stale mate and False if not."""
-        if self.check():
-            return False
-        moves = self.possible_moves()
-        for move in moves:
-            self.make_move(move)
-            if abs(minimax_value(game_state, 1)) < 500:
-                self.undo_move(move)
-                return False
-            self.undo_move(move)
-        return True
+        return not self.check() and self.legal_moves_no_castlings() == []
+
 
 def minimax_value(game_state, depth):
     """This function uses the minimax algorithm to analyze a game state.
@@ -824,7 +819,7 @@ def minimax_value(game_state, depth):
         return game_state.value
 
     # Test child nodes.
-    moves = game_state.possible_moves()
+    moves = game_state.pseudo_legal_moves_no_castlings()
     value_list = []
 
     # If no moves were found.
@@ -846,7 +841,7 @@ def minimax_value(game_state, depth):
 
 def make_random_move(game_state):
     """Make a random move to the game state. Then print out the board and the move."""
-    moves = game_state.possible_moves()
+    moves = game_state.pseudo_legal_moves_no_castlings()
     if moves:
         move = random.choice(moves)
         game_state.make_move(move)
@@ -883,7 +878,7 @@ def make_move_from_text_input(game_state):
     move.add_change(from_position, game_state.board[from_position], None)
     move.add_change(to_position, game_state.board[to_position],
                     game_state.board[from_position])
-    # En passant? Castling?
+    # En passant? Castling? Promotion?
     game_state.make_move(move)
     return True
 
@@ -892,8 +887,8 @@ def computer_move(game_state):
     If several moves are found to be equally good, a randomly choosen move of them
     is returned."""
 
-    moves = game_state.possible_moves()
-    depth = 3
+    moves = game_state.legal_moves_no_castlings()
+    depth = 2
     best_moves = []
 
     if moves == []:
@@ -948,6 +943,13 @@ if __name__ == '__main__':
 #    game_state = GameState("7r/r7/2K2k2/NNn1R3/8/8/8/R7 w - -")
 
     print()
+    print("P: white pawn   -  p: black pawn")
+    print("N: white knight -  n: black knight")
+    print("B: white biship -  b: black bishop")
+    print("R: white rook   -  r: black rook")
+    print("Q: white queen  -  q: black queen")
+    print("K: white king  -   k: black king")
+    print()
     print("Type q to quit.")
     print()
     print(game_state)
@@ -955,8 +957,10 @@ if __name__ == '__main__':
     while True:
         if not make_move_from_text_input(game_state):
             break
+        print(game_state)01
+        print()
+        print()
         if game_state.check_mate():
-            print(game_state)
             if game_state.white_to_play:
                 print("Black win")
             else:
@@ -964,7 +968,6 @@ if __name__ == '__main__':
             print("Check mate")
             break
         if game_state.stale_mate():
-            print(game_state)
             print("Stale mate")
             break
 
@@ -1016,7 +1019,7 @@ if __name__ == '__main__':
     #game_state = GameState("1k6/3PP3/2P2PP1/8/2p2p2/3p4/4p1p1/1K6 w - -")
     #game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
     #game_state = GameState("8/3K4/8/8/3r4/8/8/1k6 w - -") # Check
-    #game_state = GameState("8/3K4/8/8/8/8/3N4/1k6 b - -") # Check
+    #game_state = GameState("8/3K4/8/8/8/8/3N4/1k6 b - -") # ChecMy move is : e5
     #game_state = GameState("8/1Q1K4/R7/8/8/k7/8/8 b - -") # Check mate
     #game_state = GameState("8/1Q1K4/R7/8/8/k7/8/4b3 b - -") # Check
     #game_state = GameState("K7/P2n4/1n6/8/8/k4b2/8/8 w - -") # Check mate
