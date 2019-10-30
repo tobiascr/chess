@@ -764,6 +764,51 @@ class GameState:
             self.undo_move(move)
         return move_list
 
+    def castlings(self):
+        """Return a list of Move-objects corresponding to all possible castlings
+        in this position. It is assumed that no moves have been made to the game state
+        for while using this method."""
+        move_list = []
+        if self.castling_kingside_possible():
+            if self.white_to_play:
+                king = self.board[4]
+                rook = self.board[7]
+                move = Move()
+                move.add_change(4, king, None)
+                move.add_change(5, None, rook)
+                move.add_change(6, None, king)
+                move.add_change(7, rook, None)
+                move_list.append(move)
+            else:
+                king = self.board[60]
+                rook = self.board[63]
+                move = Move()
+                move.add_change(60, king, None)
+                move.add_change(61, None, rook)
+                move.add_change(62, None, king)
+                move.add_change(63, rook, None)
+                move_list.append(move)
+        if self.castling_queenside_possible():
+            if self.white_to_play:
+                king = self.board[4]
+                rook = self.board[0]
+                move = Move()
+                move.add_change(4, king, None)
+                move.add_change(3, None, rook)
+                move.add_change(2, None, king)
+                move.add_change(0, rook, None)
+                move_list.append(move)
+            else:
+                king = self.board[60]
+                rook = self.board[56]
+                move = Move()
+                move.add_change(60, king, None)
+                move.add_change(59, None, rook)
+                move.add_change(58, None, king)
+                move.add_change(56, rook, None)
+                move_list.append(move)
+        return move_list
+
     def make_move(self, move):
         """Make a change to the game_state described by the Move instance move.
         The value of the game state is also updated.
@@ -808,6 +853,123 @@ class GameState:
     def stale_mate(self):
         """Return True if the game state is a stale mate and False if not."""
         return not self.check() and self.legal_moves_no_castlings() == []
+
+    def castling_kingside_possible(self):
+        """Return True if the player in turn can make kingside castling
+        and False if not. This function is assumed to only be used if no moves
+        have been made to the game_state object, since castling rights may not
+        valid then.
+        """
+        if self.check():
+            return False
+        if self.white_to_play:
+            if "K" in self.castling_possibilities:
+                if self.board[5] == self.board[6] == None:
+
+                    king = self.board[4]
+                    move = Move()
+                    move.add_change(4, king, None)
+                    move.add_change(5, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    move = Move()
+                    move.add_change(4, king, None)
+                    move.add_change(6, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    return True
+        else:
+            if "k" in self.castling_possibilities:
+
+                if self.board[61] == self.board[62] == None:
+
+                    king = self.board[60]
+                    move = Move()
+                    move.add_change(60, king, None)
+                    move.add_change(61, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    move = Move()
+                    move.add_change(60, king, None)
+                    move.add_change(62, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    return True
+        return False
+
+    def castling_queenside_possible(self):
+        """Return True if the player in turn can make queenside castling
+        and False if not. This function is assumed to only be used if no moves
+        have been made to the game_state object, since castling rights may not
+        valid then."""
+        if self.check():
+            return False
+        if self.white_to_play:
+            if "Q" in self.castling_possibilities:
+                if self.board[1] == self.board[2] == self.board[3] == None:
+
+                    king = self.board[4]
+                    move = Move()
+                    move.add_change(4, king, None)
+                    move.add_change(3, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    move = Move()
+                    move.add_change(4, king, None)
+                    move.add_change(2, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    return True
+        else:
+            if "q" in self.castling_possibilities:
+
+                if self.board[57] == self.board[58] == self.board[59] == None:
+
+                    king = self.board[60]
+                    move = Move()
+                    move.add_change(60, king, None)
+                    move.add_change(59, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    move = Move()
+                    move.add_change(60, king, None)
+                    move.add_change(58, None, king)
+                    self.make_move(move)
+                    if abs(minimax_value(self, 1)) > 500:
+                        self.undo_move(move)
+                        return False
+                    self.undo_move(move)
+
+                    return True
+        return False
 
 
 def minimax_value(game_state, depth):
@@ -887,7 +1049,7 @@ def computer_move(game_state):
     If several moves are found to be equally good, a randomly choosen move of them
     is returned."""
 
-    moves = game_state.legal_moves_no_castlings()
+    moves = game_state.legal_moves_no_castlings() + game_state.castlings()
     depth = 2
     best_moves = []
 
@@ -957,7 +1119,7 @@ if __name__ == '__main__':
     while True:
         if not make_move_from_text_input(game_state):
             break
-        print(game_state)01
+        print(game_state)
         print()
         print()
         if game_state.check_mate():
