@@ -18,15 +18,15 @@ class Move:
         """Make it possible to use the print command on objects of this class."""
         lines = []
         for change in self.change_list:
-            line = convert_position_to_conventional_format(change[0]) + " "
+            line = convert_position_to_conventional_format(change[0]) + ": "
             if change[1]:
-                line += change[1].name + " "
+                line += change[1].name + " -> "
             else:
-                line += "- "
+                line += "None -> "
             if change[2]:
                 line += change[2].name
             else:
-                line += "-"
+                line += "None"
             lines.append(line)
         return ", ".join(lines)
 
@@ -1047,7 +1047,9 @@ def make_move_from_text_input(game_state):
 def computer_move(game_state):
     """Return a move, one exists that is computed with the minimax algorithm.
     If several moves are found to be equally good, a randomly choosen move of them
-    is returned."""
+    is returned. This function is assumed to only be used if no moves
+    have been made to the game_state object, since castling rights may not
+    valid then."""
 
     moves = game_state.legal_moves_no_castlings() + game_state.castlings()
     depth = 2
@@ -1086,23 +1088,8 @@ def computer_move(game_state):
 
 if __name__ == '__main__':
 
-    game_state = GameState("1q1q1k2/4q3/8/8/8/8/8/2K2QQQ w - -")
-
     # Standard starting position.
     game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-    #print(game_state)
-    #print()
-
-    #game_state = GameState("r1bqk2r/ppp1bppp/2np1n2/4p3/2B1P3/P1N2N2/1PPP1PPP/R1BQK2R w KQkq -")
-    #print(game_state)
-    #print()
-
-    # Empty position.
-    #game_state = GameState("8/8/8/8/8/8/8/8 w - -")
-    #print(game_state)
-    #print()
-
-#    game_state = GameState("7r/r7/2K2k2/NNn1R3/8/8/8/R7 w - -")
 
     print()
     print("P: white pawn   -  p: black pawn")
@@ -1149,100 +1136,6 @@ if __name__ == '__main__':
         if game_state.stale_mate():
             print("Stale mate")
             break
-
-    #game_state = GameState("8/8/8/3k4/8/3K4/8/8 w - -")
-    #game_state = GameState("8/6n1/8/3k4/8/3K4/8/N7 w - -")
-    #game_state = GameState("n7/6n1/8/3k4/8/3K4/8/NN6 w - -")
-    #game_state = GameState("2n4r/R3n3/4k1r1/8/1N6/8/8/RK2N3 w - -")
-    #game_state = GameState("rk3n2/8/8/8/8/8/8/2KRR1N1 w - -")
-    #game_state = GameState("4r1rn/R2n2kn/5r2/2R5/8/1K6/2NN4/RRR5 w - -")
-    #game_state = GameState("3k3r/8/3N4/2K5/8/8/8/8 w - -") # Fork
-    #game_state = GameState("3k3r/5N2/8/2K5/8/8/8/8 b - -") # Fork
-    #game_state = GameState("3r4/8/8/3k4/8/8/1KR5/8 w - -")    
-    #game_state = GameState("2k5/8/4p3/6p1/8/8/PP2P1P1/3K4 w - -") # Pawns and kings
-    #game_state = GameState("2k5/8/4p3/6p1/1P6/P3P1P1/8/3K4 w - -") # Pawns and kings
-    #game_state = GameState("1k3q2/2r3n1/8/8/8/3N1B2/1N6/1K3Q2 w - -")
-    #game_state = GameState("1k3q2/8/8/8/8/8/8/1K6 w - -")
-    #game_state = GameState("1k4r1/8/8/8/8/b7/B7/1K6 w - -")
-    #game_state = GameState("3k4/R7/8/8/8/8/1K5R/8 w - -") # Mate in 1.
-    #game_state = GameState("1k6/8/8/8/8/8/6p1/1K3Q2 b - -")
-    #game_state = GameState("8/8/8/3pP3/8/8/8/1K5k w - d6 0 2")
-    #game_state = GameState("1k6/8/8/8/3pP3/8/8/1K6 b - e3 0 1")
-    #game_state = GameState("k1K5/4p3/5Q2/8/8/8/8/8 b - -")
-    #game_state = GameState("1k6/8/8/3pP3/8/8/8/1K6 w - d6 0 2") # En passant possible
-    #game_state = GameState("1k6/8/8/4Pp2/8/8/8/1K6 w - f6 0 2") # En passant possible.
-    #game_state = GameState("1k6/8/8/8/4Pp2/8/8/1K6 b - e3 0 1") # En passant possible.
-    #game_state = GameState("8/8/8/3r1k2/2R5/8/2K1P3/8 w - -")
-    #game_state = GameState("r7/1P6/8/8/8/7k/8/3K4 w - -")
-    #game_state = GameState("6r1/5P2/8/8/8/7k/8/3K4 w - -")
-    #game_state = GameState("2k5/4r3/5P2/8/8/8/8/3K4 w - -")
-    #game_state = GameState("2k5/8/8/1r6/P7/8/8/3K4 w - -")
-    #game_state = GameState("2k5/8/4p3/1r3Bp1/P4n2/4P2q/2P3P1/3K4 w - -")
-    #game_state = GameState("1k6/3PP3/2P2PP1/8/2p2p2/3p4/4p1p1/1K6 w - -")
-    #game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-    #game_state = GameState("8/3K4/8/8/3r4/8/8/1k6 w - -") # Check
-    #game_state = GameState("8/3K4/8/8/8/8/3N4/1k6 b - -") # ChecMy move is : e5
-    #game_state = GameState("8/1Q1K4/R7/8/8/k7/8/8 b - -") # Check mate
-    #game_state = GameState("8/1Q1K4/R7/8/8/k7/8/4b3 b - -") # Check
-    #game_state = GameState("K7/P2n4/1n6/8/8/k4b2/8/8 w - -") # Check mate
-    #game_state = GameState("K7/P2n4/b7/8/8/k7/8/8 w - -") # Stale mate
-    #game_state = GameState("K7/P7/5N2/8/8/4k3/R7/3R1R2 b - -") # Stale mate
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-    #game_state = GameState("")
-
-    # The engine play against itself.
-#    game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-#    print(game_state)
-#    for n in range(200):
-#        move = computer_move(game_state)
-#        game_state.make_move(move)
-#        print(game_state)
-#        print(move)
-#        print("Position value: ", game_state.value)
-#        if game_state.check_mate():
-#            if game_state.white_to_play:
-#                print("Black win")
-#            else:
-#                print("White win")
-#            print("Check mate")
-#            break
-#        if game_state.stale_mate():
-#            print("Stale mate")
-#            break
-
 
 
 
