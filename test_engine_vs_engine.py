@@ -1,5 +1,5 @@
 
-import chess
+import engine as chess
 
 # The engine play against itself.
 game_state = chess.GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")

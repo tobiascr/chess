@@ -1,5 +1,5 @@
 
-import chess
+import engine as chess
 
 #game_state = chess.GameState("8/1Q1K4/R7/8/8/k7/8/4b3 b - -") # Check
 #game_state = chess.GameState("8/1Q1K4/R7/8/8/k7/8/8 b - -") # Check mate
