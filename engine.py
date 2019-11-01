@@ -34,6 +34,70 @@ class Move:
         """The values can be piece-objects or None."""
         self.change_list.append((position, value_before_change, value_after_change))
 
+    def UCI_move_format_string(self):
+        """Return the move in the UCI move format. For example like:
+        "e2e4", "e7e5", "e1g1" (white short castling), "e7e8q" (for promotion),
+        "c5b6" (en passant).
+        """
+        if len(self.change_list) == 2:
+            # The position where the move starts is not empty before the change.
+            if self.change_list[0][1] != None:
+                from_triple = self.change_list[0]
+                to_triple = self.change_list[1]
+            else:
+                from_triple = self.change_list[1]
+                to_triple = self.change_list[0]
+
+            from_position = convert_position_to_conventional_format(from_triple[0])
+            to_position = convert_position_to_conventional_format(to_triple[0])
+            from_piece = from_triple[1].name
+            to_piece = to_triple[2].name
+
+            # It promotion.
+            if from_piece != to_piece:
+                if to_piece == "Q" or to_piece == "q":
+                    return from_position + to_position + "q"
+                if to_piece == "R" or to_piece == "r":
+                    return from_position + to_position + "r"
+                if to_piece == "B" or to_piece == "b":
+                    return from_position + to_position + "b"
+                if to_piece == "N" or to_piece == "n":
+                    return from_position + to_position + "n"
+            else:
+                return from_position + to_position
+
+        # En passants.
+        if len(self.change_list) == 3:
+            positions = [convert_position_to_conventional_format(p) 
+                         for (p, vb, va) in self.change_list]
+            # The from position has a unique file.
+            files = [p[0] for p in positions]
+            for p in positions:
+                if files.count(p[0]) == 1:
+                    from_position = p
+                    break
+
+            # The to position has a unique row.
+            rows = [p[1] for p in positions]
+            for p in positions:
+                if rows.count(p[1]) == 1:
+                    to_position = p
+                    break
+
+            return from_position + to_position
+
+        # Castlings
+        if len(self.change_list) == 4:
+            positions = [p for (p, vb, va) in self.change_list]
+            if 0 in positions:
+                return "e1c1"
+            if 7 in positions:
+                return "e1g1"
+            if 56 in positions:
+                return "e8c8"
+            if 63 in positions:
+                return "e8g8"
+
 
 class King:
 
@@ -42,10 +106,10 @@ class King:
         self.white = white
         if white:
             self.name = "K"
-            self.value = 1000
+            self.value = 10000
         else:
             self.name = "k"
-            self.value = -1000
+            self.value = -10000
         self.possible_moves_dict = {
                  0: [1, 8, 9],
                  1: [0, 2, 8, 9, 10],
@@ -813,12 +877,12 @@ class GameState:
         """Make a change to the game_state described by the Move instance move.
         The value of the game state is also updated.
         """
-        for tripple in move.change_list:
-            self.board[tripple[0]] = tripple[2]
-            if tripple[1]:
-                self.value -= tripple[1].value
-            if tripple[2]:
-                self.value += tripple[2].value
+        for triple in move.change_list:
+            self.board[triple[0]] = triple[2]
+            if triple[1]:
+                self.value -= triple[1].value
+            if triple[2]:
+                self.value += triple[2].value
         self.en_passant_target_square_history.append(self.en_passant_target_square)
         self.en_passant_target_square = move.en_passant_target_square
         self.white_to_play = not self.white_to_play
@@ -827,12 +891,12 @@ class GameState:
         """Make a change to the game_state that undo the move described by the
         Move instance move. The value of the game state is also updated.
         """
-        for tripple in move.change_list:
-            self.board[tripple[0]] = tripple[1]
-            if tripple[1]:
-                self.value += tripple[1].value
-            if tripple[2]:
-                self.value -= tripple[2].value
+        for triple in move.change_list:
+            self.board[triple[0]] = triple[1]
+            if triple[1]:
+                self.value += triple[1].value
+            if triple[2]:
+                self.value -= triple[2].value
         self.en_passant_target_square = self.en_passant_target_square_history.pop()
         self.white_to_play = not self.white_to_play
 
@@ -1060,7 +1124,7 @@ def computer_move(game_state):
 
     # If maximizing player.
     if game_state.white_to_play:
-        best_value = -10000
+        best_value = -1000000
         for move in moves:
             game_state.make_move(move)
             value = minimax_value(game_state, depth)
@@ -1073,7 +1137,7 @@ def computer_move(game_state):
 
     # If minimizing player.
     else:
-        best_value = 10000
+        best_value = 1000000
         for move in moves:
             game_state.make_move(move)
             value = minimax_value(game_state, depth)
@@ -1097,7 +1161,7 @@ if __name__ == '__main__':
     print("B: white biship -  b: black bishop")
     print("R: white rook   -  r: black rook")
     print("Q: white queen  -  q: black queen")
-    print("K: white king  -   k: black king")
+    print("K: white king   -  k: black king")
     print()
     print("Type q to quit.")
     print()

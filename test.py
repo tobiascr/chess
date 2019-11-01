@@ -37,8 +37,21 @@ game_state = chess.GameState("4k2r/7p/7K/8/8/8/1B6/8 b k -")
 #game_state = chess.GameState("")
 #game_state = chess.GameState("")
 #game_state = chess.GameState("")
+
+# En passant
+#game_state = chess.GameState("8/8/8/2Pp3k/8/8/3K4/8 w - d6 0 2")
+game_state = chess.GameState("7Q/1k6/8/2q5/4Pp2/8/K7/8 b - e3 0 1")
+#game_state = chess.GameState("")
+
+#Other tests
+#game_state = chess.GameState("8/4P3/8/8/7k/8/3r4/2K5 w - -")
+#game_state = chess.GameState("8/4P3/8/8/3R3k/8/3r4/2K5 w - -")
+#game_state = chess.GameState("8/4P3/8/7k/3R4/8/3K2p1/8 b - -")
 #game_state = chess.GameState("")
 #game_state = chess.GameState("")
+#game_state = chess.GameState("")
+#game_state = chess.GameState("")
+
 
 print(game_state)
 print("Check:", game_state.check())
@@ -52,6 +65,7 @@ if not game_state.check_mate() and not game_state.stale_mate():
     print("Possible moves:")
     for move in moves:
         print(move)
+        print(move.UCI_move_format_string())
     move = chess.computer_move(game_state)
     game_state.make_move(move)
     print(game_state)
