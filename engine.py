@@ -1108,8 +1108,17 @@ def make_move_from_text_input(game_state):
     game_state.make_move(move)
     return True
 
+def computer_move_UCI(FEN_string):
+    """Return a move that is computed with the minimax algorithm.
+    If several moves are found to be equally good, a randomly choosen move of them
+    is returned. The move is returned in the UCI format.
+    """
+    game_state = GameState(FEN_string)
+    move = computer_move(game_state)
+    return move.UCI_move_format_string()
+
 def computer_move(game_state):
-    """Return a move, one exists that is computed with the minimax algorithm.
+    """Return a move that is computed with the minimax algorithm.
     If several moves are found to be equally good, a randomly choosen move of them
     is returned. This function is assumed to only be used if no moves
     have been made to the game_state object, since castling rights may not

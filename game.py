@@ -24,7 +24,11 @@ class Game:
     def __init__(self, FEN_string):
         pass
         
-        
+    def __str__(self):
+        """Make it possible to use the print command on objects of this class.
+        It prints out a chessboard with the current position.
+        """
+
     def board_value(square):
         """Return "k", "K", "p" etc f there is a piece on the square,
         and None if there is no piece. Square can be "a1", "b5" etc.
