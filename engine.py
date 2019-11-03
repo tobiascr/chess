@@ -5,6 +5,33 @@
 
 import random
 
+def check(FEN_string):
+    """Return true if and only if the player in turn is in check."""
+    return GameState(FEN_string).check()
+
+def check_mate(FEN_string):
+    """Return true if and only if the player in turn is in check_mate."""
+    return GameState(FEN_string).check_mate()
+
+def stale_mate(FEN_string):
+    """Return true if and only if the player in turn is in stale_mate."""
+    return GameState(FEN_string).stale_mate()
+
+def legal_moves_UCI(FEN_string):
+    """Return a list of all moves in UCI format that can made in this position."""
+    game_state = GameState(FEN_string)
+    moves = game_state.legal_moves_no_castlings() + game_state.castlings()
+    return [move.UCI_move_format_string() for move in moves]
+
+def computer_move_UCI(FEN_string):
+    """Return a move that is computed with the minimax algorithm.
+    If several moves are found to be equally good, a randomly choosen move of them
+    is returned. The move is returned in the UCI format.
+    """
+    game_state = GameState(FEN_string)
+    move = computer_move(game_state)
+    return move.UCI_move_format_string()
+
 
 class Move:
     """Instances of Move describes changes to a game state. They can be used both for
@@ -1107,15 +1134,6 @@ def make_move_from_text_input(game_state):
     # En passant? Castling? Promotion?
     game_state.make_move(move)
     return True
-
-def computer_move_UCI(FEN_string):
-    """Return a move that is computed with the minimax algorithm.
-    If several moves are found to be equally good, a randomly choosen move of them
-    is returned. The move is returned in the UCI format.
-    """
-    game_state = GameState(FEN_string)
-    move = computer_move(game_state)
-    return move.UCI_move_format_string()
 
 def computer_move(game_state):
     """Return a move that is computed with the minimax algorithm.

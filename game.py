@@ -23,7 +23,7 @@ class Game:
 
     def __init__(self, FEN_string):
         pass
-        
+
     def __str__(self):
         """Make it possible to use the print command on objects of this class.
         It prints out a chessboard with the current position.
@@ -34,12 +34,37 @@ class Game:
         and None if there is no piece. Square can be "a1", "b5" etc.
         """
 
-    def legal_move(self, move):
-        """Return"""
-        
-    def make_move(UCI_format_move):
+    def legal(self, UCI_format_move):
+        """Return true iff the move is legal"""
+        return
+
+    def make_move(self, UCI_format_move):
         pass
 
-def FEN_string(FEN_string, UCI_format_move):
+    def check(self):
+        pass
+
+    def check_mate(self):
+        pass
+
+    def stale_mate():
+        pass
+
+    def insufficient_material(self):
+        """Return true if and only if the position is king vs king or
+        king vs king and light piece."""
+        pass
+
+    def draw_by_repetition(self):
+        pass
+
+    def draw_by_50_move_rule(self):
+        pass
+
+
+def make_move(FEN_string, UCI_format_move):
     """Return a FEN string for the game state that result after making
     the given move to the given position."""
+
+
+
