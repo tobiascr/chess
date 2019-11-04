@@ -1,11 +1,8 @@
-
 """This includes some business logic for a chess board program.
 
 Moves are here represented in the UCI move format. For example like:
 "e2e4", "e7e5", "e1g1" (white short castling), "e7e8q" (for promotion),
 "c5b6" (en passant).
-
-Positions on the chess board are represented as for example "a1", "b5".
 
 Pieces are represented as:
 
@@ -22,43 +19,62 @@ import engine
 class Game:
 
     def __init__(self, FEN_string):
-        pass
+        self.FEN_string = FEN_string
+        self.legal_moves = engine.legal_moves_UCI(FEN_string)
+        self.FEN_string_history = []
 
-    def __str__(self):
-        """Make it possible to use the print command on objects of this class.
-        It prints out a chessboard with the current position.
-        """
+        # The board is represented as a list of rows.
+        self.board = []
 
-    def board_value(square):
-        """Return "k", "K", "p" etc f there is a piece on the square,
-        and None if there is no piece. Square can be "a1", "b5" etc.
-        """
 
     def legal(self, UCI_format_move):
         """Return true iff the move is legal"""
-        return
+        return UCI_format_move in self.legal_moves
 
     def make_move(self, UCI_format_move):
         pass
 
+    def computer_move(self):
+        """Return a move computed by the engine."""
+        return computer_move_UCI(self.FEN_string)
+
     def check(self):
-        pass
+        return engine.check(self.FEN_string)
 
     def check_mate(self):
-        pass
+        return engine.check_mate(self.FEN_string)
 
     def stale_mate():
-        pass
+        return engine.stale_mate(self.FEN_string)
 
     def insufficient_material(self):
         """Return true if and only if the position is king vs king or
         king vs king and light piece."""
-        pass
+        FEN_fields = self.FEN_string.split(" ")
+        board = FEN_fields[0]
+        pieces = ""
+        for c in board:
+            if c in "pnbrqkPNBRQK":
+                pieces += c
+        if len(pieces) > 3:
+            return False
+        for c in "prqPRQ":
+            if c in pieces:
+                return False
+        return True
 
     def draw_by_repetition(self):
         pass
 
     def draw_by_50_move_rule(self):
+        pass
+
+    def undo_move(self):
+        """Move back in move history."""
+        pass
+
+    def redo_move(self):
+        """Move forward in move history."""
         pass
 
 
