@@ -771,7 +771,6 @@ class GameState:
         rows = FEN_fields[0].split("/")
         rows.reverse()
         for row in range(8):
-            i = 0
             position = row * 8
             for char in rows[row]:
                 if char == "K":
