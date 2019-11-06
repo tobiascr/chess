@@ -21,7 +21,16 @@ def legal_moves_UCI(FEN_string):
     """Return a list of all moves in UCI format that can made in this position."""
     game_state = GameState(FEN_string)
     moves = game_state.legal_moves_no_castlings() + game_state.castlings()
-    return [move.UCI_move_format_string() for move in moves]
+    move_list = [move.UCI_move_format_string() for move in moves]
+    # If there exist promotions moves, promotions to other pieces that queens
+    # needs to be added.
+    extra_promotions = []
+    for move in move_list:
+        if len(move) == 5:
+           extra_promotions.append(move[0:4] + "r")
+           extra_promotions.append(move[0:4] + "b")
+           extra_promotions.append(move[0:4] + "n")
+    return move_list + extra_promotions
 
 def computer_move_UCI(FEN_string):
     """Return a move that is computed with the minimax algorithm.

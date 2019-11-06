@@ -69,8 +69,10 @@ def print_board(game):
 #FEN_string = "4k3/8/8/2K4b/5n2/8/8/2Q5 b - -"
 
 # Promotions
-FEN_string = "4k2r/P7/8/8/5n2/7b/8/3NK3 w K -"
+#FEN_string = "4k2r/P7/8/8/5n2/7b/8/3NK3 w K -"
 #FEN_string = "4k2r/P7/8/8/5n2/7b/6p1/3NK3 b - -"
+#FEN_string = "8/PPP2k2/8/8/8/8/6pp/2K5 w - -" # Multiple promotions
+FEN_string = "8/PPP2k2/8/8/8/8/6pp/2K5 b - -" # Multiple promotions
 
 # 50 move rule
 #FEN_string = "8/r7/8/5k2/8/7R/2K5/8 w - - 104 91"
@@ -93,7 +95,6 @@ FEN_string = "4k2r/P7/8/8/5n2/7b/8/3NK3 w K -"
 #FEN_string = "3n4/8/8/7K/8/8/2k4B/8 w - -"
 #FEN_string = "r7/5k1p/6p1/5n2/3p3P/2pK4/P4Pb1/R3R3 w - - 2 34"
 
-#FEN_string = ""
 #FEN_string = ""
 #FEN_string = ""
 #FEN_string = ""
