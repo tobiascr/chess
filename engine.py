@@ -1142,7 +1142,7 @@ def computer_move(game_state):
     valid then."""
 
     moves = game_state.legal_moves_no_castlings() + game_state.castlings()
-    depth = 2
+    depth = 4
     best_moves = []
 
     if moves == []:

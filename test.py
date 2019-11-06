@@ -65,11 +65,14 @@ def print_board(game):
 #FEN_string = "2k5/8/5R2/8/8/8/1K6/8 w - -"
 
 # Forks
-FEN_string = "4k3/8/8/2K4b/5n2/8/8/2Q5 b - -"
+#FEN_string = "4k3/8/8/2K4b/5n2/8/8/2Q5 b - -"
 
 # Promotions
 #FEN_string = "4k2r/P7/8/8/5n2/7b/8/3NK3 w K -"
 #FEN_string = "4k2r/P7/8/8/5n2/7b/6p1/3NK3 b - -"
+
+# 50 move rule
+#FEN_string = "8/r7/8/5k2/8/7R/2K5/8 w - - 104 91"
 
 #Other tests
 #game_state = engine.GameState("8/4P3/8/8/7k/8/3r4/2K5 w - -")
@@ -85,11 +88,11 @@ FEN_string = "4k3/8/8/2K4b/5n2/8/8/2Q5 b - -"
 #FEN_string = "4k3/1p3n2/6R1/8/8/1Q6/6P1/4K3 w - - 41"
 #FEN_string = "4k3/1p3n2/6R1/8/6P1/1Q6/8/4K3 b - g3 0"
 #FEN_string = "rnbqk1nr/pppp1ppp/1b2p3/8/3PP3/3B1N2/PPP2PPP/RNBQK2R b KQkq - 2 4"
-FEN_string = "rnbqk2r/pppp1ppp/1b2pn2/8/3PP3/3B1N2/PPP2PPP/RNBQK2R w KQkq - 3 5"
+#FEN_string = "rnbqk2r/pppp1ppp/1b2pn2/8/3PP3/3B1N2/PPP2PPP/RNBQK2R w KQkq - 3 5"
+#FEN_string = "3n4/8/8/7K/8/8/2k4B/8 w - -"
 
-#FEN_string = ""
-#FEN_string = ""
-#FEN_string = ""
+FEN_string = "r7/5k1p/6p1/5n2/3p3P/2pK4/P4Pb1/R3R3 w - - 2 34"
+
 #FEN_string = ""
 #FEN_string = ""
 #FEN_string = ""
@@ -116,16 +119,19 @@ print("Stale mate:", engine.stale_mate(FEN_string))
 print("Kingside castling possible:", game_state.castling_kingside_possible())
 print("Queenside castling possible:", game_state.castling_queenside_possible())
 print("Insufficient material:", game.insufficient_material())
+print("Draw by the 50 move rule: ", game.possible_draw_by_50_move_rule())
 print("Possible moves:", engine.legal_moves_UCI(FEN_string))
 
 if engine.legal_moves_UCI(FEN_string):
     move = engine.computer_move_UCI(FEN_string)
     print("Best move found by engine:", move)
 
-    #game.make_move(move)
-    game.make_move("e1g1")
+    game.make_move(move)
+
     print(game)
     print(game.FEN_string)
+
+    print("Threefold repetition: ", game.threefold_repetition())
 
 
 

@@ -40,6 +40,65 @@ class Game:
         """Return true iff the move is legal"""
         return UCI_format_move in self.legal_moves
 
+    def computer_move(self):
+        """Return a move computed by the engine."""
+        return engine.computer_move_UCI(self.FEN_string)
+
+    def check(self):
+        return engine.check(self.FEN_string)
+
+    def check_mate(self):
+        return engine.check_mate(self.FEN_string)
+
+    def stale_mate(self):
+        return engine.stale_mate(self.FEN_string)
+
+    def insufficient_material(self):
+        """Return true if and only if the position is king vs king or
+        king vs king and light piece."""
+        FEN_fields = self.FEN_string.split(" ")
+        board = FEN_fields[0]
+        pieces = ""
+        for c in board:
+            if c in "pnbrqkPNBRQK":
+                pieces += c
+        if len(pieces) > 3:
+            return False
+        for c in "prqPRQ":
+            if c in pieces:
+                return False
+        return True
+
+    def threefold_repetition(self):
+        """Return True if and only if the current position has occured 2 times
+        earlier. Positions are considered the same if the same player has the move,
+        pieces of the same kind and color occupy the same squares, and the
+        possible moves of all the pieces of both players are the same.
+        This is the case if the FEN strings of the positions have the same
+        first four fields.
+        """
+        # Produce a string that contain the first four fields in the current
+        # FEN string.
+        FEN_fields = self.FEN_string.split(" ")
+        partial_FEN_string = " ".join([FEN_fields[n] for n in range(4)])
+
+        # Look for that strings in the history list that contain that string as a
+        # substring.
+        repeat = 0
+        for FEN_string in self.FEN_string_history:
+            if partial_FEN_string in FEN_string:
+                repeat += 1
+        return repeat >= 2
+
+    def possible_draw_by_50_move_rule(self):
+        """Return True if and only if 50 moves have been made by each player
+        without capturing or pushing a pawn."""
+        FEN_fields = self.FEN_string.split(" ")
+        if len(FEN_fields) <= 4:
+            return False
+        else:
+            return int(FEN_fields[4]) >= 100
+
     def make_move(self, UCI_format_move):
         from_position = UCI_format_move[0:2]
         to_position = UCI_format_move[2:4]
@@ -65,27 +124,18 @@ class Game:
 
         castling_availability = FEN_fields[2]
 
-        # If white castling.
-        if UCI_format_move == "e1c1" or UCI_format_move == "e1g1":
-            castling_availability = castling_availability.replace("K","")
-            castling_availability = castling_availability.replace("Q","")
-        # If black castling.
-        elif UCI_format_move == "e8c8" or UCI_format_move == "e8g8":
-            castling_availability = castling_availability.replace("k","")
-            castling_availability = castling_availability.replace("q","")
-        else:
-            if "K" in castling_availability:
-                if from_position == "e1" or from_position == "h1" or to_position == "h1":
-                    castling_availability = castling_availability.replace("K","")
-            if "Q" in castling_availability:
-                if from_position == "e1" or from_position == "a1" or to_position == "a1":
-                    castling_availability = castling_availability.replace("Q","")
-            if "k" in castling_availability:
-                if from_position == "e8" or from_position == "h8" or to_position == "h8":
-                    castling_availability = castling_availability.replace("k","")
-            if "q" in castling_availability:
-                if from_position == "e8" or from_position == "a8" or to_position == "a8":
-                    castling_availability = castling_availability.replace("q","")
+        if "K" in castling_availability:
+            if from_position == "e1" or from_position == "h1" or to_position == "h1":
+                castling_availability = castling_availability.replace("K","")
+        if "Q" in castling_availability:
+            if from_position == "e1" or from_position == "a1" or to_position == "a1":
+                castling_availability = castling_availability.replace("Q","")
+        if "k" in castling_availability:
+            if from_position == "e8" or from_position == "h8" or to_position == "h8":
+                castling_availability = castling_availability.replace("k","")
+        if "q" in castling_availability:
+            if from_position == "e8" or from_position == "a8" or to_position == "a8":
+                castling_availability = castling_availability.replace("q","")
 
         if castling_availability == "":
             castling_availability = "-"
@@ -95,7 +145,6 @@ class Game:
         en_passant_target_square = "-"
         if piece_moved == "P":
             if UCI_format_move[1] == "2" and UCI_format_move[3] == "4":
-                print("hi")
                 en_passant_target_square = UCI_format_move[0] + "3"
         if piece_moved == "p":
             if UCI_format_move[1] == "7" and UCI_format_move[3] == "5":
@@ -126,50 +175,6 @@ class Game:
             full_move_number += 1
 
         self.FEN_string += str(full_move_number)
-
-
-    def computer_move(self):
-        """Return a move computed by the engine."""
-        return computer_move_UCI(self.FEN_string)
-
-    def check(self):
-        return engine.check(self.FEN_string)
-
-    def check_mate(self):
-        return engine.check_mate(self.FEN_string)
-
-    def stale_mate():
-        return engine.stale_mate(self.FEN_string)
-
-    def insufficient_material(self):
-        """Return true if and only if the position is king vs king or
-        king vs king and light piece."""
-        FEN_fields = self.FEN_string.split(" ")
-        board = FEN_fields[0]
-        pieces = ""
-        for c in board:
-            if c in "pnbrqkPNBRQK":
-                pieces += c
-        if len(pieces) > 3:
-            return False
-        for c in "prqPRQ":
-            if c in pieces:
-                return False
-        return True
-
-    def draw_by_repetition(self):
-        pass
-
-    def draw_by_50_move_rule(self):
-        pass
-
-    def undo_move(self):
-        """Move back in move history."""
-        pass
-
-    def redo_move(self):
-        """Move forward in move history."""
-        pass
 
 
 class Board:
@@ -239,27 +244,27 @@ class Board:
             return
 
         # Castlings
-        if UCI_format_move == "e1c1":
+        if UCI_format_move == "e1c1" and self.get_value("e1") == "K":
             self.set_value("a1", None)
             self.set_value("b1", None)
             self.set_value("c1", "K")
             self.set_value("d1", "R")
             self.set_value("e1", None)
             return
-        if UCI_format_move == "e1g1":
+        if UCI_format_move == "e1g1" and self.get_value("e1") == "K":
             self.set_value("e1", None)
             self.set_value("f1", "R")
             self.set_value("g1", "K")
             self.set_value("h1", None)
             return
-        if UCI_format_move == "e8c8":
+        if UCI_format_move == "e8c8" and self.get_value("e8") == "k":
             self.set_value("a8", None)
             self.set_value("b8", None)
             self.set_value("c8", "k")
             self.set_value("d8", "r")
             self.set_value("e8", None)
             return
-        if UCI_format_move == "e8g8":
+        if UCI_format_move == "e8g8" and self.get_value("e8") == "k":
             self.set_value("e8", None)
             self.set_value("f8", "r")
             self.set_value("g8", "k")
