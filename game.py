@@ -113,7 +113,7 @@ class Game:
 
         # Update the FEN string.
         FEN_fields = self.FEN_string.split(" ")
-        self.FEN_string = self.board.FEN_string_first_part()
+        self.FEN_string = self.board.FEN_string_board_part()
 
         if FEN_fields[1] == "w":
             self.FEN_string += " b "
@@ -291,8 +291,8 @@ class Board:
         self.set_value(from_position, None)
         self.set_value(to_position, piece)
 
-    def FEN_string_first_part(self):
-        """Use the data in this class to produce the first part of a FEN string
+    def FEN_string_board_part(self):
+        """Use the data in this class to produce the part of a FEN string
         that describe the placement of the pieces."""
         def convert_to_FEN_row(row):
             FEN_row = ""
@@ -310,9 +310,3 @@ class Board:
             return FEN_row
 
         return "/".join([convert_to_FEN_row(self.rows[i]) for i in range(7,-1,-1)])
-
-
-
-
-
-
