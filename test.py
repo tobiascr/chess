@@ -10,6 +10,7 @@ def print_board(game):
 #FEN_string = "K7/P2n4/1n6/8/8/k4b2/8/8 w - -" # Check mate
 #FEN_string = "K7/P2n4/b7/8/8/k7/8/8 w - -" # Stale mate
 #FEN_string = "K7/P7/5N2/8/8/4k3/R7/3R1R2 b - -" # Stale mate
+#FEN_string = "KBn5/PRP5/1P6/8/8/8/8/5k2 w - - 0 1" # No possible moves
 
 # Castling tests
 #FEN_string = "3k4/3p4/1q6/8/8/8/8/4K2R w K -"
@@ -68,7 +69,7 @@ def print_board(game):
 #FEN_string = "4k3/8/8/2K4b/5n2/8/8/2Q5 b - -"
 
 # Promotions
-#FEN_string = "4k2r/P7/8/8/5n2/7b/8/3NK3 w K -"
+FEN_string = "4k2r/P7/8/8/5n2/7b/8/3NK3 w K -"
 #FEN_string = "4k2r/P7/8/8/5n2/7b/6p1/3NK3 b - -"
 
 # 50 move rule
@@ -90,10 +91,8 @@ def print_board(game):
 #FEN_string = "rnbqk1nr/pppp1ppp/1b2p3/8/3PP3/3B1N2/PPP2PPP/RNBQK2R b KQkq - 2 4"
 #FEN_string = "rnbqk2r/pppp1ppp/1b2pn2/8/3PP3/3B1N2/PPP2PPP/RNBQK2R w KQkq - 3 5"
 #FEN_string = "3n4/8/8/7K/8/8/2k4B/8 w - -"
+#FEN_string = "r7/5k1p/6p1/5n2/3p3P/2pK4/P4Pb1/R3R3 w - - 2 34"
 
-FEN_string = "r7/5k1p/6p1/5n2/3p3P/2pK4/P4Pb1/R3R3 w - - 2 34"
-
-#FEN_string = ""
 #FEN_string = ""
 #FEN_string = ""
 #FEN_string = ""

@@ -242,7 +242,7 @@ class Queen:
             self.value = -9
 
     def possible_moves(self, game_state, from_position):
-        """Return all positions that this piece can move to if it's located at from_position."""
+        """Return all moves that this piece can make if it's located at from_position."""
         return Rook.possible_moves(self, game_state, from_position) + Bishop.possible_moves(
                self, game_state, from_position)
 
@@ -260,8 +260,8 @@ class Rook:
             self.value = -5
 
     def possible_moves(self, game_state, from_position):
-        """Return all positions except for positions reached by castlings
-        that this piece can move to if it's located at from_position."""
+        """Return all moves except for castlings that this piece can make if it's
+        located at from_position."""
         move_list = []
 
         # Moves up.
@@ -347,7 +347,7 @@ class Bishop:
             self.value = -3
 
     def possible_moves(self, game_state, from_position):
-        """Return all positions that this piece can move to if it's located at from_position"""
+        """Return all moves this piece can make if it's located at from_position"""
         # Row and column for the position.
         [from_r, from_c] = [from_position // 8, from_position % 8]
         move_list = []
@@ -520,7 +520,7 @@ class Knight:
                  63: [46, 53]}
 
     def possible_moves(self, game_state, from_position):
-        """Return all positions that this piece can move to if it's located at from_position."""
+        """Return all moves this piece can make if it's located at from_position."""
         move_list = []
         for to_position in self.possible_moves_dict[from_position]:
             piece = game_state.board[to_position]
@@ -559,7 +559,8 @@ class Pawn:
         self.queen_to_promote = Queen(white)
 
     def possible_moves(self, game_state, from_position):
-        """Return all positions that this piece can move to if it's located at from_position."""
+        """Return all moves this piece can make if it's located at from_position
+        with the exception of promotion to other pieces than queens."""
         move_list = []
         [from_row, from_col] = [from_position // 8, from_position % 8]
 
@@ -844,7 +845,8 @@ class GameState:
 
     def legal_moves_no_castlings(self):
         """Return a list of Move-objects corresponding to all possible legal moves
-        in this position, except for castlings."""
+        in this position, except for castlings and promotion to other pieces than
+        queens."""
         move_list = []
         moves = self.pseudo_legal_moves_no_castlings()
         for move in moves:
@@ -1091,18 +1093,6 @@ def minimax_value(game_state, depth):
     else:
         return min(value_list)
 
-def make_random_move(game_state):
-    """Make a random move to the game state. Then print out the board and the move."""
-    moves = game_state.pseudo_legal_moves_no_castlings()
-    if moves:
-        move = random.choice(moves)
-        game_state.make_move(move)
-        print(game_state)
-        print("Computer move:")
-        print(move)
-    else:
-        print("No piece to move.")
-
 def convert_position_to_engine_format(position):
     """Convert conventional position format to engine format.
     position can be for example "a1". For example "a1" is converted to 0.
@@ -1115,24 +1105,6 @@ def convert_position_to_conventional_format(position):
     """
     [r, c] = [position // 8 + 1, position % 8]
     return "abcdefgh"[c] + str(r)
-
-def make_move_from_text_input(game_state):
-    """Ask the user for a move and make that move. The move can be expressed in the UCI long
-    algebraic notation. Return true if a move is given. Return False if the input
-    is q."""
-    player_input = input("Your move: ")
-    if player_input == "q":
-        return False
-    from_position = convert_position_to_engine_format(player_input[0:2])
-    to_position = convert_position_to_engine_format(player_input[2:4])
-    piece = game_state.board[from_position]
-    move = Move()
-    move.add_change(from_position, game_state.board[from_position], None)
-    move.add_change(to_position, game_state.board[to_position],
-                    game_state.board[from_position])
-    # En passant? Castling? Promotion?
-    game_state.make_move(move)
-    return True
 
 def computer_move(game_state):
     """Return a move that is computed with the minimax algorithm.
@@ -1175,58 +1147,3 @@ def computer_move(game_state):
             game_state.undo_move(move)
 
     return random.choice(best_moves)
-
-if __name__ == '__main__':
-
-    # Standard starting position.
-    game_state = GameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-
-    print()
-    print("P: white pawn   -  p: black pawn")
-    print("N: white knight -  n: black knight")
-    print("B: white biship -  b: black bishop")
-    print("R: white rook   -  r: black rook")
-    print("Q: white queen  -  q: black queen")
-    print("K: white king   -  k: black king")
-    print()
-    print("Type q to quit.")
-    print()
-    print(game_state)
-    print()
-    while True:
-        if not make_move_from_text_input(game_state):
-            break
-        print(game_state)
-        print()
-        print()
-        if game_state.check_mate():
-            if game_state.white_to_play:
-                print("Black win")
-            else:
-                print("White win")
-            print("Check mate")
-            break
-        if game_state.stale_mate():
-            print("Stale mate")
-            break
-
-        move = computer_move(game_state)
-        game_state.make_move(move)
-        print(game_state)
-        print(move)
-        print("Position value: ", game_state.value)
-
-        if game_state.check_mate():
-            if game_state.white_to_play:
-                print("Black win")
-            else:
-                print("White win")
-            print("Check mate")
-            break
-        if game_state.stale_mate():
-            print("Stale mate")
-            break
-
-
-
-

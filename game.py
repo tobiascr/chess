@@ -176,6 +176,8 @@ class Game:
 
         self.FEN_string += str(full_move_number)
 
+        # Update legal move list.
+        self.legal_moves = engine.legal_moves_UCI(self.FEN_string)
 
 class Board:
     """Instances of this class describes how the pieces are placed on the board."""
