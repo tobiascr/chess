@@ -122,8 +122,7 @@ print("2) Play black")
 print()
 
 game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-#game = Game("8/1pp4k/1p6/8/8/8/1Q6/2K3R1 w - -")
-#game = Game("8/1pp4k/1p6/8/8/8/1Q6/2K2R2 w - -")
+
 while True:
     player_input = input("Your choice: ")
     if player_input == "1":
