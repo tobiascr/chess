@@ -5,16 +5,15 @@ from game import Game
 
 class Square(tk.Canvas):
 
-    def __init__(self, parent, side_length, color, coordinates):
+    def __init__(self, parent, color, coordinates):
         """coordinates can be for example "a1"."""
-        tk.Canvas.__init__(self, parent, width=side_length, height=side_length,
-                           bg=color, highlightthickness=0)
+        tk.Canvas.__init__(self, parent, width=square_side_length,
+                           height=square_side_length, bg=color, highlightthickness=0)
         self.bind("<Button-1>", self.mouse_click)
         self.coordinates = coordinates
-        self.side_length = side_length
         self.high_light = False
-        self.high_light_rectangle = self.create_rectangle(0, 0, self.side_length-1,
-                                       self.side_length-1, width=7, outline="#00DDFF",
+        self.high_light_rectangle = self.create_rectangle(0, 0, square_side_length-1,
+                                       square_side_length-1, width=7, outline="#00DDFF",
                                        state=tk.HIDDEN)
         self.piece = None
         self.image = self.create_image(0, 0, anchor=tk.NW, state=tk.HIDDEN)
@@ -86,44 +85,76 @@ class Square(tk.Canvas):
                         move += "q"
                 high_light_square.toggle_high_light()
                 high_light_square = None
-                print(move)
                 if game.legal(move):
                     game.make_move(move)
-                    squares.update()
+                    board.update()
                     move = game.computer_move()
                     game.make_move(move)
-                    squares.update()
+                    board.update()
 
 
-class Squares(tk.Frame):
+class Board(tk.Frame):
 
     def __init__(self, parent):
-        self.side_length = 60
+        tk.Frame.__init__(self, parent)
         self.light_square_color = "#DDDDDD"
         self.dark_square_color = "#222244"
-        tk.Frame.__init__(self, parent)
         self.square_list = []
- 
-        def rank(parent, number):
-            frame = tk.Frame(parent)
-            for n in range(8):
-                color = [self.dark_square_color, self.light_square_color][(n + number + 1) % 2]
-                coordinates = "abcdefgh"[n] + str(number)
-                square = Square(frame, self.side_length, color, coordinates)
-                square.pack(side=tk.LEFT)
-                self.square_list.append(square)
-            return frame
+        self.rank_labels = []
+        self.file_labels = []
+        self.normal_orientation = True
 
-        for n in range(1, 9):
-            rank(self, n).pack(side=tk.BOTTOM)
+        # Make squares.
+        for r in range(0, 8):
+            for f in range(1, 9):
+                color = [self.dark_square_color, self.light_square_color][(r + f) % 2]
+                coordinates = "abcdefgh"[f-1] + str(8-r)
+                square = Square(self, color, coordinates)
+                square.grid(row=r, column=f)
+                self.square_list.append(square)
+
+        # Make labels.
+        for r in range(0, 8):
+            rank_label = tk.Label(self, text=str(8-r), padx=4)
+            rank_label.grid(row=r, column=0)
+            self.rank_labels.append(rank_label)
+
+        for f in range(1, 9):
+            file_label = tk.Label(self, text="abcdefgh"[f-1])
+            file_label.grid(row=8, column=f)
+            self.file_labels.append(file_label)
+
+    def set_orientation(self, normal_orientation):
+        """Set if the board should be displayed normally or upside down. """
+        self.normal_orientation = normal_orientation
+        if normal_orientation:
+            # Set normal orientation.
+            self.normal_orientation = normal_orientation
+            for square in self.square_list:
+               r = 8 - int(square.coordinates[1])
+               f = "abcdefgh".find(square.coordinates[0]) + 1
+               square.grid(row=r, column = f)
+            for n in range(8):
+                self.rank_labels[n].grid(row=n)
+                self.file_labels[n].grid(column=n+1)
+        else:
+            # Set upside down orientation.
+            self.normal_orientation = normal_orientation
+            for square in self.square_list:
+               r = int(square.coordinates[1]) - 1
+               f = 8 - "abcdefgh".find(square.coordinates[0])
+               square.grid(row=r, column = f)
+            for n in range(8):
+                self.rank_labels[n].grid(row=7-n)
+                self.file_labels[n].grid(column=8-n)
 
     def update(self):
         for square in self.square_list:
             square.update()
 
 
-#game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-game = Game("4k2r/P7/8/8/5n2/7b/8/3NK3 w K -")
+game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+#game = Game("4k2r/P7/8/8/5n2/7b/8/3NK3 w K -")
 
 high_light_square = None
 
@@ -144,12 +175,11 @@ image_b = tk.PhotoImage(file="Images/Chess_bdt60.gif")
 image_n = tk.PhotoImage(file="Images/Chess_ndt60.gif")
 image_p = tk.PhotoImage(file="Images/Chess_pdt60.gif")
 
-squares = Squares(root)
-squares.pack()
-squares.update()
+square_side_length = 60
+
+board = Board(root)
+board.update()
+board.pack()
 
 root.mainloop()
-
-
-
 

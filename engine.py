@@ -89,7 +89,7 @@ class Move:
             from_piece = from_triple[1].name
             to_piece = to_triple[2].name
 
-            # It promotion.
+            # If promotion.
             if from_piece != to_piece:
                 if to_piece == "Q" or to_piece == "q":
                     return from_position + to_position + "q"
@@ -841,7 +841,8 @@ class GameState:
 
     def pseudo_legal_moves_no_castlings(self):
         """Return a list of Move-objects corresponding to all possible pseudo-legal moves
-        in this position, except for castlings."""
+        in this position, except for castlings and promotion to other pieces than
+        queens."""
         move_list = []
         for position in range(64):
             piece = self.board[position]
