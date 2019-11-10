@@ -102,7 +102,6 @@ class Board(tk.Frame):
         self.square_list = []
         self.rank_labels = []
         self.file_labels = []
-        self.normal_orientation = True
 
         # Make squares.
         for r in range(0, 8):
@@ -124,30 +123,23 @@ class Board(tk.Frame):
             file_label.grid(row=8, column=f)
             self.file_labels.append(file_label)
 
-    def set_orientation(self, normal_orientation):
-        """Set if the board should be displayed normally (True)
-        or upside down (False)."""
-        self.normal_orientation = normal_orientation
-        if normal_orientation:
-            # Set normal orientation.
-            self.normal_orientation = normal_orientation
-            for square in self.square_list:
-               r = 8 - int(square.coordinates[1])
-               f = "abcdefgh".find(square.coordinates[0]) + 1
-               square.grid(row=r, column = f)
-            for n in range(8):
-                self.rank_labels[n].grid(row=n)
-                self.file_labels[n].grid(column=n+1)
-        else:
-            # Set upside down orientation.
-            self.normal_orientation = normal_orientation
-            for square in self.square_list:
-               r = int(square.coordinates[1]) - 1
-               f = 8 - "abcdefgh".find(square.coordinates[0])
-               square.grid(row=r, column = f)
-            for n in range(8):
-                self.rank_labels[n].grid(row=7-n)
-                self.file_labels[n].grid(column=8-n)
+    def set_normal_orientation(self):
+        for square in self.square_list:
+            r = 8 - int(square.coordinates[1])
+            f = "abcdefgh".find(square.coordinates[0]) + 1
+            square.grid(row=r, column = f)
+        for n in range(8):
+            self.rank_labels[n].grid(row=n)
+            self.file_labels[n].grid(column=n+1)
+
+    def set_upside_down_orientation(self):
+        for square in self.square_list:
+           r = int(square.coordinates[1]) - 1
+           f = 8 - "abcdefgh".find(square.coordinates[0])
+           square.grid(row=r, column = f)
+        for n in range(8):
+            self.rank_labels[n].grid(row=7-n)
+            self.file_labels[n].grid(column=8-n)
 
     def update(self):
         for square in self.square_list:
