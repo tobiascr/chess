@@ -96,12 +96,13 @@ class Square(tk.Canvas):
 class Board(tk.Frame):
 
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
+        self.coordinate_label_color = "#DDDDDD"
         self.light_square_color = "#DDDDDD"
         self.dark_square_color = "#222244"
         self.square_list = []
         self.rank_labels = []
         self.file_labels = []
+        tk.Frame.__init__(self, parent, bg=self.coordinate_label_color)
 
         # Make squares.
         for r in range(0, 8):
@@ -114,12 +115,12 @@ class Board(tk.Frame):
 
         # Make labels.
         for r in range(0, 8):
-            rank_label = tk.Label(self, text=str(8-r), padx=4)
+            rank_label = tk.Label(self, text=str(8-r), padx=4, bg=self.coordinate_label_color)
             rank_label.grid(row=r, column=0)
             self.rank_labels.append(rank_label)
 
         for f in range(1, 9):
-            file_label = tk.Label(self, text="abcdefgh"[f-1])
+            file_label = tk.Label(self, text="abcdefgh"[f-1], bg=self.coordinate_label_color)
             file_label.grid(row=8, column=f)
             self.file_labels.append(file_label)
 
@@ -144,6 +145,14 @@ class Board(tk.Frame):
     def update(self):
         for square in self.square_list:
             square.update()
+
+class StatusBar(tk.Label):
+
+    def __init__(self, parent):
+        tk.Label.__init__(self, parent, text="", anchor=tk.W, bg="#CCCCCC")
+
+    def update(self, new_text):
+        self.config(text=new_text)
 
 
 game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
@@ -173,6 +182,10 @@ square_side_length = 60
 board = Board(root)
 board.update()
 board.pack()
+
+status_bar = StatusBar(root)
+status_bar.pack(fill=tk.X)
+status_bar.update("Your turn")
 
 root.mainloop()
 
