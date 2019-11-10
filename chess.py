@@ -125,7 +125,8 @@ class Board(tk.Frame):
             self.file_labels.append(file_label)
 
     def set_orientation(self, normal_orientation):
-        """Set if the board should be displayed normally or upside down. """
+        """Set if the board should be displayed normally (True)
+        or upside down (False)."""
         self.normal_orientation = normal_orientation
         if normal_orientation:
             # Set normal orientation.
