@@ -18,6 +18,12 @@ class Square(tk.Canvas):
         self.piece = None
         self.image = self.create_image(0, 0, anchor=tk.NW, state=tk.HIDDEN)
 
+    def unbind_mouse(self):
+        self.unbind("<Button-1>")
+
+    def rebind_mouse(self):
+        self.bind("<Button-1>", self.mouse_click)
+
     def update(self):
         piece = game.board_value(self.coordinates)
         if self.piece != piece:
@@ -88,26 +94,67 @@ class Square(tk.Canvas):
                 if game.legal(move):
                     game.make_move(move)
                     board.update()
+
+                    if game.check_mate():
+                        status_bar.set_text("You win! Check mate.")
+                        board.unbind_mouse()
+                        return
+                    if game.stale_mate():
+                        status_bar.set_text("Stale mate")
+                        board.unbind_mouse()
+                        return
+                    if game.insufficient_material():
+                        status_bar.set_text("Draw by insufficient material.")
+                        board.unbind_mouse()
+                        return
+                    if game.threefold_repetition():
+                        status_bar.set_text("Draw by threefold repetition.")
+                        board.unbind_mouse()
+                        return
+                    if game.possible_draw_by_50_move_rule():
+                        status_bar.set_text("Draw by the 50 move rule.")
+                        board.unbind_mouse()
+                        return
+
+                    root.update_idletasks()
                     move = game.computer_move()
                     game.make_move(move)
                     board.update()
+
+                    if game.check_mate():
+                        status_bar.set_text("Computer win! Check mate.")
+                        board.unbind_mouse()
+                        return
+                    if game.stale_mate():
+                        status_bar.set_text("Stale mate")
+                        board.unbind_mouse()
+                        return
+                    if game.insufficient_material():
+                        status_bar.set_text("Draw by insufficient material.")
+                        board.unbind_mouse()
+                        return
+                    if game.threefold_repetition():
+                        status_bar.set_text("Draw by threefold repetition.")
+                        board.unbind_mouse()
+                        return
+                    if game.possible_draw_by_50_move_rule():
+                        status_bar.set_text("Draw by the 50 move rule.")
+                        board.unbind_mouse()
+                        return
 
 
 class Board(tk.Frame):
 
     def __init__(self, parent):
-        self.coordinate_label_color = "#DDDDDD"
-        self.light_square_color = "#DDDDDD"
-        self.dark_square_color = "#222244"
         self.square_list = []
         self.rank_labels = []
         self.file_labels = []
-        tk.Frame.__init__(self, parent, bg=self.coordinate_label_color)
+        tk.Frame.__init__(self, parent, bg=coordinate_label_color)
 
         # Make squares.
         for r in range(0, 8):
             for f in range(1, 9):
-                color = [self.dark_square_color, self.light_square_color][(r + f) % 2]
+                color = [dark_square_color, light_square_color][(r + f) % 2]
                 coordinates = "abcdefgh"[f-1] + str(8-r)
                 square = Square(self, color, coordinates)
                 square.grid(row=r, column=f)
@@ -115,14 +162,22 @@ class Board(tk.Frame):
 
         # Make labels.
         for r in range(0, 8):
-            rank_label = tk.Label(self, text=str(8-r), padx=4, bg=self.coordinate_label_color)
+            rank_label = tk.Label(self, text=str(8-r), padx=4, bg=coordinate_label_color)
             rank_label.grid(row=r, column=0)
             self.rank_labels.append(rank_label)
 
         for f in range(1, 9):
-            file_label = tk.Label(self, text="abcdefgh"[f-1], bg=self.coordinate_label_color)
+            file_label = tk.Label(self, text="abcdefgh"[f-1], bg=coordinate_label_color)
             file_label.grid(row=8, column=f)
             self.file_labels.append(file_label)
+
+    def unbind_mouse(self):
+        for square in self.square_list:
+            square.unbind_mouse()
+
+    def rebind_mouse(self):
+        for square in self.square_list:
+            square.rebind_mouse()
 
     def set_normal_orientation(self):
         for square in self.square_list:
@@ -149,16 +204,23 @@ class Board(tk.Frame):
 class StatusBar(tk.Label):
 
     def __init__(self, parent):
-        tk.Label.__init__(self, parent, text="", anchor=tk.W, bg="#CCCCCC")
+        tk.Label.__init__(self, parent, text="", anchor=tk.W, bg=status_bar_color)
 
-    def update(self, new_text):
+    def set_text(self, new_text):
         self.config(text=new_text)
 
 
-game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+#game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
 #game = Game("4k2r/P7/8/8/5n2/7b/8/3NK3 w K -")
+game = Game("k7/7R/6Q1/8/6K1/8/8/8 w - -")
+game = Game("5K2/r7/1q6/8/1k6/8/8/8 w - -")
+game = Game("k7/4R3/8/8/8/8/6PK/2Q5 w - -")
 
 high_light_square = None
+coordinate_label_color = "#DDDDDD"
+light_square_color = "#DDDDDD"
+dark_square_color = "#222244"
+status_bar_color = "#CCCCCC"
 
 root = tk.Tk()
 root.title("Chess")
@@ -183,9 +245,12 @@ board = Board(root)
 board.update()
 board.pack()
 
+# Empty space to the right of the board.
+#tk.Frame(self).grid(row=0, column=9, padx=5)
+
 status_bar = StatusBar(root)
 status_bar.pack(fill=tk.X)
-status_bar.update("Your turn")
+status_bar.set_text("Your turn")
 
 root.mainloop()
 
