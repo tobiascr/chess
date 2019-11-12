@@ -218,9 +218,6 @@ class Board(tk.Frame):
         for square in self.square_list:
             square.update_image()
 
-    def update(self):
-        for square in self.square_list:
-            square.update()
 
 class StatusBar(tk.Label):
 
@@ -256,35 +253,13 @@ def new_game_black():
     board.rebind_mouse()
     status_bar.set_text("Your turn")
 
-def new_game():
-    global player_is_white
-    player_is_white = False
-    global game
-    game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-    if player_is_white:
-        board.set_normal_orientation()
-    else:
-        board.set_upside_down_orientation()
-        status_bar.set_text("Thinking..")
-        root.update_idletasks()
-        move = game.computer_move()
-        game.make_move(move)
-    board.reset_highlight()
-    board.update_squares()
-    board.rebind_mouse()
-    status_bar.set_text("Your turn")
-
-#game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-#game = Game("4k2r/P7/8/8/5n2/7b/8/3NK3 w K -")
-game = Game("k7/7R/6Q1/8/6K1/8/8/8 w - -")
-#game = Game("5K2/r7/1q6/8/1k6/8/8/8 w - -")
-#game = Game("k7/4R3/8/8/8/8/6PK/2Q5 w - -")
+game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
 
 player_is_white = True
 highlight_square = None
 coordinate_label_color = "#DDDDDD"
 light_square_color = "#DDDDDD"
-dark_square_color = "#222244"
+dark_square_color = "#405088"
 status_bar_color = "#CCCCCC"
 highlight_color = "#00DDFF"
 
