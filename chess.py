@@ -11,9 +11,9 @@ class Square(tk.Canvas):
                            height=square_side_length, bg=color, highlightthickness=0)
         self.bind("<Button-1>", self.mouse_click)
         self.coordinates = coordinates
-        self.high_light = False
-        self.high_light_rectangle = self.create_rectangle(0, 0, square_side_length-1,
-                                       square_side_length-1, width=7, outline="#00DDFF",
+        self.highlight = False
+        self.highlight_rectangle = self.create_rectangle(0, 0, square_side_length-1,
+                                       square_side_length-1, width=7, outline=highlight_color,
                                        state=tk.HIDDEN)
         self.piece = None
         self.image = self.create_image(0, 0, anchor=tk.NW, state=tk.HIDDEN)
@@ -55,42 +55,58 @@ class Square(tk.Canvas):
                 self.itemconfig(self.image, image=image_p, state=tk.NORMAL)
             self.piece = piece
 
-    def toggle_high_light(self):
-        self.high_light = not self.high_light
-        if self.high_light:
-            self.itemconfig(self.high_light_rectangle, state=tk.NORMAL)
+    def toggle_highlight(self):
+        self.highlight = not self.highlight
+        if self.highlight:
+            self.itemconfig(self.highlight_rectangle, state=tk.NORMAL)
         else:
-            self.itemconfig(self.high_light_rectangle, state=tk.HIDDEN)
+            self.itemconfig(self.highlight_rectangle, state=tk.HIDDEN)
+
+    def reset_highlight(self):
+        self.highlight = False
+        self.itemconfig(self.highlight_rectangle, state=tk.HIDDEN)
 
     def mouse_click(self, event):
-        global high_light_square
-        if high_light_square == None:
+        global highlight_square
+        if highlight_square == None:
             if game.board_value(self.coordinates) != None:
-                if game.board_value(self.coordinates) in "KQRBNP":
-                    high_light_square = self
-                    self.toggle_high_light()
+                if player_is_white:
+                    if game.board_value(self.coordinates) in "KQRBNP":
+                        highlight_square = self
+                        self.toggle_highlight()
+                else:
+                    if game.board_value(self.coordinates) in "kqrbnp":
+                        highlight_square = self
+                        self.toggle_highlight()
         else:
-            if high_light_square == self:
-                high_light_square = None
-                self.toggle_high_light()
+            if highlight_square == self:
+                highlight_square = None
+                self.toggle_highlight()
             else:
                 if game.board_value(self.coordinates) != None:
-                    if game.board_value(self.coordinates) in "KQRBNP":
-                        high_light_square.toggle_high_light()
-                        high_light_square = self
-                        self.toggle_high_light()
-                        return
-                move = high_light_square.coordinates + self.coordinates
+                    if player_is_white:
+                        if game.board_value(self.coordinates) in "KQRBNP":
+                            highlight_square.toggle_highlight()
+                            highlight_square = self
+                            self.toggle_highlight()
+                            return
+                    else:
+                        if game.board_value(self.coordinates) in "kqrbnp":
+                            highlight_square.toggle_highlight()
+                            highlight_square = self
+                            self.toggle_highlight()
+                            return
+                move = highlight_square.coordinates + self.coordinates
                 # If white promotion.
-                if game.board_value(high_light_square.coordinates) == "P":
-                    if high_light_square.coordinates[1] == "7":
+                if game.board_value(highlight_square.coordinates) == "P":
+                    if highlight_square.coordinates[1] == "7":
                         move += "q"
                 # If black promotion.
-                if game.board_value(high_light_square.coordinates) == "p":
-                    if high_light_square.coordinates[1] == "2":
+                if game.board_value(highlight_square.coordinates) == "p":
+                    if highlight_square.coordinates[1] == "2":
                         move += "q"
-                high_light_square.toggle_high_light()
-                high_light_square = None
+                highlight_square.toggle_highlight()
+                highlight_square = None
                 if game.legal(move):
                     board.unbind_mouse()
                     game.make_move(move)
@@ -192,6 +208,12 @@ class Board(tk.Frame):
             self.rank_labels[n].grid(row=7-n)
             self.file_labels[n].grid(column=8-n)
 
+    def reset_highlight(self):
+        global highlight_square
+        highlight_square = None
+        for square in self.square_list:
+            square.reset_highlight()
+
     def update_squares(self):
         for square in self.square_list:
             square.update_image()
@@ -208,18 +230,63 @@ class StatusBar(tk.Label):
     def set_text(self, new_text):
         self.config(text=new_text)
 
+def new_game_white():
+    global player_is_white
+    player_is_white = True
+    global game
+    game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+    board.set_normal_orientation()
+    board.reset_highlight()
+    board.update_squares()
+    board.rebind_mouse()
+    status_bar.set_text("Your turn")
 
-game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+def new_game_black():
+    global player_is_white
+    player_is_white = False
+    global game
+    game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+    status_bar.set_text("Thinking..")
+    root.update_idletasks()
+    move = game.computer_move()
+    game.make_move(move)
+    board.set_upside_down_orientation()
+    board.reset_highlight()
+    board.update_squares()
+    board.rebind_mouse()
+    status_bar.set_text("Your turn")
+
+def new_game():
+    global player_is_white
+    player_is_white = False
+    global game
+    game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+    if player_is_white:
+        board.set_normal_orientation()
+    else:
+        board.set_upside_down_orientation()
+        status_bar.set_text("Thinking..")
+        root.update_idletasks()
+        move = game.computer_move()
+        game.make_move(move)
+    board.reset_highlight()
+    board.update_squares()
+    board.rebind_mouse()
+    status_bar.set_text("Your turn")
+
+#game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
 #game = Game("4k2r/P7/8/8/5n2/7b/8/3NK3 w K -")
-#game = Game("k7/7R/6Q1/8/6K1/8/8/8 w - -")
+game = Game("k7/7R/6Q1/8/6K1/8/8/8 w - -")
 #game = Game("5K2/r7/1q6/8/1k6/8/8/8 w - -")
 #game = Game("k7/4R3/8/8/8/8/6PK/2Q5 w - -")
 
-high_light_square = None
+player_is_white = True
+highlight_square = None
 coordinate_label_color = "#DDDDDD"
 light_square_color = "#DDDDDD"
 dark_square_color = "#222244"
 status_bar_color = "#CCCCCC"
+highlight_color = "#00DDFF"
 
 root = tk.Tk()
 root.title("Chess")
@@ -247,6 +314,15 @@ board.pack()
 status_bar = StatusBar(root)
 status_bar.pack(fill=tk.X)
 status_bar.set_text("Your turn")
+
+menubar = tk.Menu(root, relief="flat", borderwidth=0)
+menu = tk.Menu(menubar, tearoff=0)
+menu.add_command(label="New game - white", command=new_game_white)
+menu.add_command(label="New game - black", command=new_game_black)
+menu.add_separator()
+menu.add_command(label="Exit", command=root.quit)
+menubar.add_cascade(label="Menu", menu=menu)
+root.config(menu=menubar)
 
 root.mainloop()
 
