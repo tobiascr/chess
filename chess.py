@@ -154,6 +154,7 @@ class Square(tk.Canvas):
                     board.update() # Handle possible events.
                     board.rebind_mouse()
 
+
 class Board(tk.Frame):
 
     def __init__(self, parent):
@@ -226,6 +227,7 @@ class StatusBar(tk.Label):
 
     def set_text(self, new_text):
         self.config(text=new_text)
+
 
 def new_game_white():
     global player_is_white
