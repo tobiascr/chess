@@ -1074,6 +1074,50 @@ class GameState:
         return False
 
 
+def minimax_value_alpha_beta_pruning(game_state, depth, alpha=-1000000, beta=1000000):
+    """This function uses the minimax algorithm to analyze a game state.
+    White is the maximizing player and black the minimizing."""
+
+    # If max depth is reached or if king is captured.
+    if depth == 0 or abs(game_state.value) > 500:
+        return game_state.value
+
+    # Test child nodes.
+    moves = game_state.pseudo_legal_moves_no_castlings()
+    value_list = []
+
+    # If no moves were found.
+    if moves == []:
+        return 0
+
+    # If maximizing player.
+    if game_state.white_to_play:
+        best_value = -1000000
+        for move in moves:
+            game_state.make_move(move)
+            new_value = minimax_value_alpha_beta_pruning(game_state, depth-1, alpha, beta)
+            game_state.undo_move(move)
+            best_value = max(best_value, new_value)
+            alpha = max(alpha, new_value)
+            if beta <= alpha:
+                #print("a", alpha)
+                break
+        return best_value
+
+    # If minimizing player.
+    else:
+        best_value = 1000000
+        for move in moves:
+            game_state.make_move(move)
+            new_value = minimax_value_alpha_beta_pruning(game_state, depth-1, alpha, beta)
+            game_state.undo_move(move)
+            best_value = min(best_value, new_value)
+            beta = min(beta, new_value)
+            if beta <= alpha:
+                #print("b", beta)
+                break
+        return best_value
+
 def minimax_value(game_state, depth):
     """This function uses the minimax algorithm to analyze a game state.
     White is the maximizing player and black the minimizing."""
@@ -1135,7 +1179,7 @@ def computer_move(game_state):
         best_value = -1000000
         for move in moves:
             game_state.make_move(move)
-            value = minimax_value(game_state, depth)
+            value = minimax_value_alpha_beta_pruning(game_state, depth)
             if value == best_value:
                 best_moves.append(move)
             if value > best_value:
@@ -1148,7 +1192,7 @@ def computer_move(game_state):
         best_value = 1000000
         for move in moves:
             game_state.make_move(move)
-            value = minimax_value(game_state, depth)
+            value = minimax_value_alpha_beta_pruning(game_state, depth)
             if value == best_value:
                 best_moves.append(move)
             if value < best_value:
