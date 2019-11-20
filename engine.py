@@ -217,7 +217,8 @@ class King:
         located at from_position, including putting itself into check and capturing the
         opponents king.
         """
-        move_list = []
+        capture_move_list = []
+        non_capture_move_list = []
         for to_position in self.possible_moves_dict[from_position]:
             piece = game_state.board[to_position]
             if piece:
@@ -227,16 +228,16 @@ class King:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
 
             # If the is no piece on the target square.
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
 
-        return move_list
+        return (capture_move_list, non_capture_move_list)
 
 
 class Queen:
@@ -252,8 +253,10 @@ class Queen:
 
     def possible_moves(self, game_state, from_position):
         """Return all moves that this piece can make if it's located at from_position."""
-        return Rook.possible_moves(self, game_state, from_position) + Bishop.possible_moves(
-               self, game_state, from_position)
+        return (Rook.possible_moves(self, game_state, from_position)[0] +
+                Bishop.possible_moves(self, game_state, from_position)[0],
+                Rook.possible_moves(self, game_state, from_position)[1] +
+                Bishop.possible_moves(self, game_state, from_position)[1])
 
 
 class Rook:
@@ -271,7 +274,8 @@ class Rook:
     def possible_moves(self, game_state, from_position):
         """Return all moves except for castlings that this piece can make if it's
         located at from_position."""
-        move_list = []
+        capture_move_list = []
+        non_capture_move_list = []
 
         # Moves up.
         for to_position in range(from_position + 8, 64, 8):
@@ -282,13 +286,13 @@ class Rook:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
 
         # Moves down.
         for to_position in range(from_position - 8, -1, -8):
@@ -299,13 +303,13 @@ class Rook:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
 
         # Moves right.
         for to_position in range(from_position + 1, from_position - from_position % 8 + 8, 1):
@@ -316,13 +320,13 @@ class Rook:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
 
         # Moves left.
         for to_position in range(from_position - 1, from_position - from_position % 8 - 1, -1):
@@ -333,15 +337,15 @@ class Rook:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
 
-        return move_list
+        return (capture_move_list, non_capture_move_list)
 
 
 class Bishop:
@@ -359,7 +363,8 @@ class Bishop:
         """Return all moves this piece can make if it's located at from_position"""
         # Row and column for the position.
         [from_r, from_c] = [from_position // 8, from_position % 8]
-        move_list = []
+        capture_move_list = []
+        non_capture_move_list = []
 
         # Moves up right.
         r = from_r + 1
@@ -373,13 +378,13 @@ class Bishop:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
             c += 1
             r += 1
 
@@ -395,13 +400,13 @@ class Bishop:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
             c -= 1
             r += 1
 
@@ -417,13 +422,13 @@ class Bishop:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
             c += 1
             r -= 1
 
@@ -439,17 +444,17 @@ class Bishop:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
                 break
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
             c -= 1
             r -= 1
 
-        return move_list
+        return (capture_move_list, non_capture_move_list)
 
 
 class Knight:
@@ -530,7 +535,8 @@ class Knight:
 
     def possible_moves(self, game_state, from_position):
         """Return all moves this piece can make if it's located at from_position."""
-        move_list = []
+        capture_move_list = []
+        non_capture_move_list = []
         for to_position in self.possible_moves_dict[from_position]:
             piece = game_state.board[to_position]
             if piece:
@@ -540,17 +546,16 @@ class Knight:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(to_position, piece, self)
-                    move_list.append(move)
+                    capture_move_list.append(move)
 
             # If the is no piece on the target square.
             else:
                 move = Move()
                 move.add_change(from_position, self, None)
                 move.add_change(to_position, None, self)
-                move_list.append(move)
+                non_capture_move_list.append(move)
 
-        return move_list
-
+        return (capture_move_list, non_capture_move_list)
 
 class Pawn:
 
@@ -570,7 +575,8 @@ class Pawn:
     def possible_moves(self, game_state, from_position):
         """Return all moves this piece can make if it's located at from_position
         with the exception of promotion to other pieces than queens."""
-        move_list = []
+        capture_move_list = []
+        non_capture_move_list = []
         [from_row, from_col] = [from_position // 8, from_position % 8]
 
         if self.white:
@@ -580,7 +586,7 @@ class Pawn:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(from_position + 8, None, self)
-                    move_list.append(move)
+                    non_capture_move_list.append(move)
 
                     # Non capture move two steps.
                     if game_state.board[from_position + 16] == None:
@@ -589,7 +595,7 @@ class Pawn:
                         move.add_change(from_position + 16, None, self)
                         # This move triggers en passant possibility.
                         move.en_passant_target_square = from_position + 8
-                        move_list.append(move)
+                        non_capture_move_list.append(move)
 
             if from_row < 6:
                 # Queenside capture.
@@ -601,7 +607,7 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self)
-                            move_list.append(move)
+                            capture_move_list.append(move)
                     # En passant.
                     if from_row == 4:
                         if to_position == game_state.en_passant_target_square:
@@ -610,7 +616,7 @@ class Pawn:
                             move.add_change(to_position, None, self)
                             move.add_change(from_position - 1, 
                                             game_state.board[from_position - 1], None)
-                            move_list.append(move)
+                            capture_move_list.append(move)
 
                 # Kingside capture.
                 if from_col < 7:
@@ -621,7 +627,7 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self)
-                            move_list.append(move)
+                            capture_move_list.append(move)
                     # En passant.
                     if from_row == 4:
                         if to_position == game_state.en_passant_target_square:
@@ -630,7 +636,7 @@ class Pawn:
                             move.add_change(to_position, None, self)
                             move.add_change(from_position + 1,
                                             game_state.board[from_position + 1], None)
-                            move_list.append(move)
+                            capture_move_list.append(move)
 
             if 1 < from_row < 6:
                 # Non capture move.
@@ -638,7 +644,7 @@ class Pawn:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(from_position + 8, None, self)
-                    move_list.append(move)
+                    non_capture_move_list.append(move)
 
             if from_row == 6:
                 # Promotion.
@@ -646,7 +652,7 @@ class Pawn:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(from_position + 8, None, self.queen_to_promote)
-                    move_list.append(move)
+                    non_capture_move_list.append(move)
 
                 # Queenside promotion capture.
                 if from_col > 0:
@@ -657,7 +663,7 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self.queen_to_promote)
-                            move_list.append(move)
+                            capture_move_list.append(move)
 
                 # Kingside promotion capture.
                 if from_col < 7:
@@ -668,7 +674,7 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self.queen_to_promote)
-                            move_list.append(move)
+                            capture_move_list.append(move)
         else:
             if from_row == 6:
                 # Non capture moves one step.
@@ -676,7 +682,7 @@ class Pawn:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(from_position - 8, None, self)
-                    move_list.append(move)
+                    non_capture_move_list.append(move)
 
                     # Non capture move two steps.
                     if game_state.board[from_position - 16] == None:
@@ -685,7 +691,7 @@ class Pawn:
                         move.add_change(from_position - 16, None, self)
                         # This move triggers en passant possibility.
                         move.en_passant_target_square = from_position - 8
-                        move_list.append(move)
+                        non_capture_move_list.append(move)
 
             if from_row > 1:
                 # Queenside capture.
@@ -697,7 +703,7 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self)
-                            move_list.append(move)
+                            capture_move_list.append(move)
                     # En passant.
                     if from_row == 3:
                         if to_position == game_state.en_passant_target_square:
@@ -706,7 +712,7 @@ class Pawn:
                             move.add_change(to_position, None, self)
                             move.add_change(from_position - 1, 
                                             game_state.board[from_position - 1], None)
-                            move_list.append(move)
+                            capture_move_list.append(move)
 
                 # Kingside capture.
                 if from_col < 7:
@@ -717,7 +723,7 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self)
-                            move_list.append(move)
+                            capture_move_list.append(move)
                     # En passant.
                     if from_row == 3:
                         if to_position == game_state.en_passant_target_square:
@@ -726,7 +732,7 @@ class Pawn:
                             move.add_change(to_position, None, self)
                             move.add_change(from_position + 1,
                                             game_state.board[from_position + 1], None)
-                            move_list.append(move)
+                            capture_move_list.append(move)
 
             if 1 < from_row < 6:
                 # Non capture move.
@@ -734,7 +740,7 @@ class Pawn:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(from_position - 8, None, self)
-                    move_list.append(move)
+                    non_capture_move_list.append(move)
 
             if from_row == 1:
                 # Promotion.
@@ -742,7 +748,7 @@ class Pawn:
                     move = Move()
                     move.add_change(from_position, self, None)
                     move.add_change(from_position - 8, None, self.queen_to_promote)
-                    move_list.append(move)
+                    non_capture_move_list.append(move)
 
                 # Queenside promotion capture.
                 if from_col > 0:
@@ -753,7 +759,7 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self.queen_to_promote)
-                            move_list.append(move)
+                            capture_move_list.append(move)
 
                 # Kingside promotion capture.
                 if from_col < 7:
@@ -764,9 +770,8 @@ class Pawn:
                             move = Move()
                             move.add_change(from_position, self, None)
                             move.add_change(to_position, piece, self.queen_to_promote)
-                            move_list.append(move)
-        return move_list
-
+                            capture_move_list.append(move)
+        return (capture_move_list, non_capture_move_list)
 
 class GameState:
 
@@ -842,16 +847,20 @@ class GameState:
     def pseudo_legal_moves_no_castlings(self):
         """Return a list of Move-objects corresponding to all possible pseudo-legal moves
         in this position, except for castlings and promotion to other pieces than
-        queens."""
-        move_list = []
+        queens. The moves are sorted in such a way that the capture moves are preceding
+        the non capture moves."""
+        capture_move_list = []
+        non_capture_move_list = []
         for position in range(64):
             piece = self.board[position]
             # If there is a piece.
             if piece:
                 # If the piece have the right color.
                 if piece.white == self.white_to_play:
-                    move_list += piece.possible_moves(self, position)
-        return move_list
+                    (c_move_list, non_c_move_list) = piece.possible_moves(self, position)
+                    capture_move_list += c_move_list
+                    non_capture_move_list += non_c_move_list
+        return capture_move_list + non_capture_move_list
 
     def legal_moves_no_castlings(self):
         """Return a list of Move-objects corresponding to all possible legal moves
