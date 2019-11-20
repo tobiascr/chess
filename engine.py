@@ -1180,7 +1180,7 @@ def computer_move(game_state):
     depth = 3
     best_moves = []
 
-    # The move order is randomized in order to make opening moves
+    # The move order is randomized in order to make opening move
     # selection more natural.
     random.shuffle(moves)
 
