@@ -860,7 +860,9 @@ class GameState:
                     (c_move_list, non_c_move_list) = piece.possible_moves(self, position)
                     capture_move_list += c_move_list
                     non_capture_move_list += non_c_move_list
+
         return capture_move_list + non_capture_move_list
+
 
     def legal_moves_no_castlings(self):
         """Return a list of Move-objects corresponding to all possible legal moves
@@ -1177,6 +1179,10 @@ def computer_move(game_state):
     moves = game_state.legal_moves_no_castlings() + game_state.castlings()
     depth = 3
     best_moves = []
+
+    # The move order is randomized in order to make opening moves
+    # selection more natural.
+    random.shuffle(moves)
 
     if moves == []:
         return None
