@@ -14,13 +14,9 @@ test_positions = [
 "1r3rk1/2p1n1b1/1q2p1pp/p2pPp2/3PbP2/1P2NNQ1/PR4PP/2B1R1K1 w - - 5 22"
 ]
 
-# Game states corresponding to the positions.
-game_states = [engine.GameState(FEN_string) for FEN_string in test_positions]
-
 t0 = time.time()
 for n in range(3):
-    for game_state in game_states:
-        print(engine.computer_move(game_state))
+    for FEN_string in test_positions:
+        print(engine.computer_move_UCI(FEN_string))
 t1 = time.time()
 print("Time:", t1 - t0)
-
