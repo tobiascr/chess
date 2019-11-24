@@ -861,7 +861,7 @@ class GameState:
                     non_capture_move_list += non_c_move_list
 
         # The capture moves are sorted so that moves where the captured
-        # piece have a higher absolute value than the capturing piece is
+        # piece have a higher absolute value than the capturing piece are
         # prioritized.
         def value_difference(capture_move):
             if len(capture_move.change_list) > 2:
@@ -1096,6 +1096,64 @@ class GameState:
         return False
 
 
+def minimax_value_alpha_beta_pruning_LMR(game_state, depth, alpha=-1000000, beta=1000000):
+    """This function uses the minimax algorithm with alpha beta pruning
+    to analyze a game state. White is the maximizing player and black the minimizing.
+    """
+
+    #global node_counter
+    #node_counter += 1
+
+    # If max depth is reached or if king is captured.
+    if depth <= 0 or abs(game_state.value) > 500:
+        return game_state.value
+
+    # Test child nodes.
+    moves = game_state.pseudo_legal_moves_no_castlings()
+    value_list = []
+    LMR_cutoff = len(moves) // 2
+    #LMR_cutoff = 4
+
+    # If no moves were found.
+    if moves == []:
+        return 0
+
+    # If maximizing player.
+    if game_state.white_to_play:
+        best_value = -1000000
+        n = 0
+        for move in moves:
+            n += 1
+            game_state.make_move(move)
+            if n < LMR_cutoff:
+                new_value = minimax_value_alpha_beta_pruning_LMR(game_state, depth-1, alpha, beta)
+            else:
+                new_value = minimax_value_alpha_beta_pruning_LMR(game_state, depth-2, alpha, beta)
+            game_state.undo_move(move)
+            best_value = max(best_value, new_value)
+            alpha = max(alpha, new_value)
+            if beta <= alpha:
+                break
+        return best_value
+
+    # If minimizing player.
+    else:
+        best_value = 1000000
+        n = 0
+        for move in moves:
+            n += 1
+            game_state.make_move(move)
+            if n < LMR_cutoff:
+                new_value = minimax_value_alpha_beta_pruning_LMR(game_state, depth-1, alpha, beta)
+            else:
+                new_value = minimax_value_alpha_beta_pruning_LMR(game_state, depth-2, alpha, beta)
+            game_state.undo_move(move)
+            best_value = min(best_value, new_value)
+            beta = min(beta, new_value)
+            if beta <= alpha:
+                break
+        return best_value
+
 def minimax_value_alpha_beta_pruning(game_state, depth, alpha=-1000000, beta=1000000):
     """This function uses the minimax algorithm with alpha beta pruning
     to analyze a game state. White is the maximizing player and black the minimizing.
@@ -1194,7 +1252,7 @@ def computer_move(game_state):
     node_counter = 0
 
     moves = game_state.legal_moves_no_castlings() + game_state.castlings()
-    depth = 3
+    depth = 4
     best_move = None
 
     # The move order is randomized in order to make opening move
@@ -1218,7 +1276,7 @@ def computer_move(game_state):
 
     # If minimizing player.
     else:
-        alpha= - 1000000
+        alpha= -1000000
         beta = 1000000
         for move in moves:
             game_state.make_move(move)
@@ -1229,62 +1287,5 @@ def computer_move(game_state):
             game_state.undo_move(move)
 
     #print(node_counter)
-
-    return best_move
-
-def computer_move_2(game_state):
-    """Return a move that is computed with the minimax algorithm.
-    This function is assumed to only be used if no moves
-    have been made to the game_state object, since castling rights may not
-    valid then."""
-
-    moves = game_state.legal_moves_no_castlings() + game_state.castlings()
-
-    if moves == []:
-        return None
-
-    # The move order is randomized in order to make opening move
-    # selection more natural.
-    random.shuffle(moves)
-
-    # First sort moves with a based on how they score on a lower
-    # depth search.
-
-    def value(move):
-        game_state.make_move(move)
-        move_value = minimax_value_alpha_beta_pruning(game_state, depth=2)
-        game_state.undo_move(move)
-        return move_value
-
-    moves.sort(key=value, reverse=game_state.white_to_play)
-
-    moves = moves[:10]
-
-    depth = 3
-    best_move = None
-
-    # If maximizing player.
-    if game_state.white_to_play:
-        alpha = -1000000
-        beta = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            value = minimax_value_alpha_beta_pruning(game_state, depth, alpha, beta)
-            if value > alpha:
-                best_move = move
-                alpha = value
-            game_state.undo_move(move)
-
-    # If minimizing player.
-    else:
-        alpha= - 1000000
-        beta = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            value = minimax_value_alpha_beta_pruning(game_state, depth, alpha, beta)
-            if value < beta:
-                best_move = move
-                beta = value
-            game_state.undo_move(move)
 
     return best_move
