@@ -1252,7 +1252,17 @@ def computer_move(game_state):
     node_counter = 0
 
     moves = game_state.legal_moves_no_castlings() + game_state.castlings()
-    depth = 4
+
+    number_of_pieces = 0
+    for s in range(64):
+        if game_state.board[s] != None:
+            number_of_pieces += 1
+
+    if number_of_pieces > 15:
+        depth = 3
+    else:
+        depth = 4
+
     best_move = None
 
     # The move order is randomized in order to make opening move
