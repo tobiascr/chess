@@ -776,9 +776,9 @@ class GameState:
 
     def __init__(self, FEN_string):
 
-        # The pieces are stored in the board dictionary at keys that corresponds
+        # The pieces are stored in the board list at indexes that corresponds
         # to their position. Positions with no pieces have the value None.
-        self.board = {p:None for p in range(64)}
+        self.board = [None]*64
 
         # Decode the FEN string.
         FEN_fields = FEN_string.split(" ")
