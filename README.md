@@ -3,11 +3,11 @@ The code in this repository is programmed in Python 3.7.3 using the standard lib
 
 To play chess with a graphical user inteface, run
 
-chess.py
+    chess.py
 
 To play chess with a command line user interface, run
 
-chess_command_line.py
+    chess_command_line.py
 
 All code in this repository is licensed under a MIT license described in the LICENSE file in this folder.
 

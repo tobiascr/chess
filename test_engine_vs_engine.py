@@ -65,6 +65,5 @@ for n in range(1, number_of_games + 1):
             print("Draw by the 50 move rule.")
             print_info()
             break
-        print_info() 
-       
-            
+        print_info()
+
