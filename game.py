@@ -14,7 +14,8 @@ Pieces are represented as:
 "K": white king   -  "k": black king
 """
 
-import engine
+from engine import computer_move_UCI
+import simple_engine
 
 class Game:
     """It is intended that this class should function as an interface for the engine
@@ -23,7 +24,7 @@ class Game:
     def __init__(self, FEN_string):
         self.FEN_string = FEN_string
         self.FEN_string_history = []
-        self.legal_moves = engine.legal_moves_UCI(FEN_string)
+        self.legal_moves = simple_engine.legal_moves_UCI(FEN_string)
         self.board = Board(FEN_string)
 
     def __str__(self):
@@ -42,16 +43,16 @@ class Game:
 
     def computer_move(self):
         """Return a move computed by the engine."""
-        return engine.computer_move_UCI(self.FEN_string)
+        return computer_move_UCI(self.FEN_string)
 
     def check(self):
-        return engine.check(self.FEN_string)
+        return simple_engine.check(self.FEN_string)
 
     def check_mate(self):
-        return engine.check_mate(self.FEN_string)
+        return simple_engine.check_mate(self.FEN_string)
 
     def stale_mate(self):
-        return engine.stale_mate(self.FEN_string)
+        return simple_engine.stale_mate(self.FEN_string)
 
     def insufficient_material(self):
         """Return true if and only if the position is king vs king or
@@ -177,7 +178,7 @@ class Game:
         self.FEN_string += str(full_move_number)
 
         # Update legal move list.
-        self.legal_moves = engine.legal_moves_UCI(self.FEN_string)
+        self.legal_moves = simple_engine.legal_moves_UCI(self.FEN_string)
 
 class Board:
     """Instances of this class describes how the pieces are placed on the board."""

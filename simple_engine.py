@@ -4,12 +4,32 @@
 
 import random
 
-def computer_move_UCI(FEN_string):
-    """Return a move that is computed by the engine. The move is returned in the UCI format.
-    """
+def check(FEN_string):
+    """Return true if and only if the player in turn is in check."""
+    return GameState(FEN_string).check()
+
+def check_mate(FEN_string):
+    """Return true if and only if the player in turn is in check_mate."""
+    return GameState(FEN_string).check_mate()
+
+def stale_mate(FEN_string):
+    """Return true if and only if the player in turn is in stale_mate."""
+    return GameState(FEN_string).stale_mate()
+
+def legal_moves_UCI(FEN_string):
+    """Return a list of all moves in UCI format that can made in this position."""
     game_state = GameState(FEN_string)
-    move = computer_move(game_state)
-    return move.UCI_move_format_string()
+    moves = game_state.legal_moves_no_castlings() + game_state.castlings()
+    move_list = [move.UCI_move_format_string() for move in moves]
+    # If there exist promotions moves, promotions to other pieces that queens
+    # needs to be added.
+    extra_promotions = []
+    for move in move_list:
+        if len(move) == 5:
+           extra_promotions.append(move[0:4] + "r")
+           extra_promotions.append(move[0:4] + "b")
+           extra_promotions.append(move[0:4] + "n")
+    return move_list + extra_promotions
 
 
 class Move:
@@ -943,6 +963,14 @@ class GameState:
         self.undo_move(nullmove)
         return result
 
+    def check_mate(self):
+        """Return True if the game state is a check mate and False if not."""
+        return self.check() and self.legal_moves_no_castlings() == []
+
+    def stale_mate(self):
+        """Return True if the game state is a stale mate and False if not."""
+        return not self.check() and self.legal_moves_no_castlings() == []
+
     def castling_kingside_possible(self):
         """Return True if the player in turn can make kingside castling
         and False if not. This function is assumed to only be used if no moves
@@ -1061,52 +1089,6 @@ class GameState:
         return False
 
 
-def minimax_value_alpha_beta_pruning(game_state, depth, alpha=-1000000, beta=1000000):
-    """This function uses the minimax algorithm with alpha beta pruning
-    to analyze a game state. White is the maximizing player and black the minimizing.
-    """
-
-    #global node_counter
-    #node_counter += 1
-
-    # If max depth is reached or if king is captured.
-    if depth == 0 or abs(game_state.value) > 500:
-        return game_state.value
-
-    # Test child nodes.
-    moves = game_state.pseudo_legal_moves_no_castlings()
-    value_list = []
-
-    # If no moves were found.
-    if moves == []:
-        return 0
-
-    # If maximizing player.
-    if game_state.white_to_play:
-        best_value = -1000000
-        for move in moves:
-            game_state.make_move(move)
-            new_value = minimax_value_alpha_beta_pruning(game_state, depth-1, alpha, beta)
-            game_state.undo_move(move)
-            best_value = max(best_value, new_value)
-            alpha = max(alpha, new_value)
-            if beta <= alpha:
-                break
-        return best_value
-
-    # If minimizing player.
-    else:
-        best_value = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            new_value = minimax_value_alpha_beta_pruning(game_state, depth-1, alpha, beta)
-            game_state.undo_move(move)
-            best_value = min(best_value, new_value)
-            beta = min(beta, new_value)
-            if beta <= alpha:
-                break
-        return best_value
-
 def minimax_value(game_state, depth):
     """This function uses the minimax algorithm to analyze a game state.
     White is the maximizing player and black the minimizing.
@@ -1148,61 +1130,3 @@ def convert_position_to_conventional_format(position):
     """
     [r, c] = [position // 8 + 1, position % 8]
     return "abcdefgh"[c] + str(r)
-
-def computer_move(game_state):
-    """Return a move that is computed with the minimax algorithm.
-    This function is assumed to only be used if no moves
-    have been made to the game_state object, since castling rights may not
-    valid then."""
-
-    global node_counter
-    node_counter = 0
-
-    moves = game_state.legal_moves_no_castlings() + game_state.castlings()
-
-    number_of_pieces = 0
-    for s in range(64):
-        if game_state.board[s] != None:
-            number_of_pieces += 1
-
-    if number_of_pieces > 15:
-        depth = 3
-    else:
-        depth = 4
-
-    best_move = None
-
-    # The move order is randomized in order to make opening move
-    # selection more natural.
-    random.shuffle(moves)
-
-    if moves == []:
-        return None
-
-    # If maximizing player.
-    if game_state.white_to_play:
-        alpha = -1000000
-        beta = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            value = minimax_value_alpha_beta_pruning(game_state, depth, alpha, beta)
-            if value > alpha:
-                best_move = move
-                alpha = value
-            game_state.undo_move(move)
-
-    # If minimizing player.
-    else:
-        alpha= -1000000
-        beta = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            value = minimax_value_alpha_beta_pruning(game_state, depth, alpha, beta)
-            if value < beta:
-                best_move = move
-                beta = value
-            game_state.undo_move(move)
-
-    #print(node_counter)
-
-    return best_move
