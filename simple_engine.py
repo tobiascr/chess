@@ -1,4 +1,7 @@
-"""Positions are represented as integers from 0 to 63. 0 represent a1,
+"""This program can be used to find checks, check mates, stale mates and legal moves
+from a given position.
+
+Positions are represented as integers from 0 to 63. 0 represent a1,
 1 represent b1, 8 represent a2 etc.
 """
 
