@@ -856,7 +856,7 @@ class GameState:
         moves = self.pseudo_legal_moves_no_castlings()
         for move in moves:
             self.make_move(move)
-            if abs(minimax_value(self, 1)) < 500:
+            if abs(minimax(self, 1)) < 500:
                 move_list.append(move)
             self.undo_move(move)
         return move_list
@@ -939,7 +939,7 @@ class GameState:
         """
         nullmove = Move()
         self.make_move(nullmove)
-        result = abs(minimax_value(self, 1)) > 500
+        result = abs(minimax(self, 1)) > 500
         self.undo_move(nullmove)
         return result
 
@@ -960,7 +960,7 @@ class GameState:
                     move.add_change(4, king, None)
                     move.add_change(5, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -969,7 +969,7 @@ class GameState:
                     move.add_change(4, king, None)
                     move.add_change(6, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -985,7 +985,7 @@ class GameState:
                     move.add_change(60, king, None)
                     move.add_change(61, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -994,7 +994,7 @@ class GameState:
                     move.add_change(60, king, None)
                     move.add_change(62, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -1018,7 +1018,7 @@ class GameState:
                     move.add_change(4, king, None)
                     move.add_change(3, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -1027,7 +1027,7 @@ class GameState:
                     move.add_change(4, king, None)
                     move.add_change(2, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -1043,7 +1043,7 @@ class GameState:
                     move.add_change(60, king, None)
                     move.add_change(59, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -1052,7 +1052,7 @@ class GameState:
                     move.add_change(60, king, None)
                     move.add_change(58, None, king)
                     self.make_move(move)
-                    if abs(minimax_value(self, 1)) > 500:
+                    if abs(minimax(self, 1)) > 500:
                         self.undo_move(move)
                         return False
                     self.undo_move(move)
@@ -1061,53 +1061,7 @@ class GameState:
         return False
 
 
-def minimax_value_alpha_beta_pruning(game_state, depth, alpha=-1000000, beta=1000000):
-    """This function uses the minimax algorithm with alpha beta pruning
-    to analyze a game state. White is the maximizing player and black the minimizing.
-    """
-
-    #global node_counter
-    #node_counter += 1
-
-    # If max depth is reached or if king is captured.
-    if depth == 0 or abs(game_state.value) > 500:
-        return game_state.value
-
-    # Test child nodes.
-    moves = game_state.pseudo_legal_moves_no_castlings()
-    value_list = []
-
-    # If no moves were found.
-    if moves == []:
-        return 0
-
-    # If maximizing player.
-    if game_state.white_to_play:
-        best_value = -1000000
-        for move in moves:
-            game_state.make_move(move)
-            new_value = minimax_value_alpha_beta_pruning(game_state, depth-1, alpha, beta)
-            game_state.undo_move(move)
-            best_value = max(best_value, new_value)
-            alpha = max(alpha, new_value)
-            if beta <= alpha:
-                break
-        return best_value
-
-    # If minimizing player.
-    else:
-        best_value = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            new_value = minimax_value_alpha_beta_pruning(game_state, depth-1, alpha, beta)
-            game_state.undo_move(move)
-            best_value = min(best_value, new_value)
-            beta = min(beta, new_value)
-            if beta <= alpha:
-                break
-        return best_value
-
-def minimax_value(game_state, depth):
+def minimax(game_state, depth):
     """This function uses the minimax algorithm to analyze a game state.
     White is the maximizing player and black the minimizing.
     """
@@ -1125,7 +1079,7 @@ def minimax_value(game_state, depth):
 
     for move in moves:
         game_state.make_move(move)
-        value_list.append(minimax_value(game_state, depth-1))
+        value_list.append(minimax(game_state, depth-1))
         game_state.undo_move(move)
 
     # If maximizing player.
@@ -1135,6 +1089,41 @@ def minimax_value(game_state, depth):
     # If minimizing player.
     else:
         return min(value_list)
+
+def negamax(game_state, depth, alpha, beta):
+    """Compute a value of game_state. The value is seen from the perspective of the
+    player in turn. A favorable position for that player is given a positive value.
+    """
+
+    #global node_counter
+    #node_counter += 1
+
+    # If max depth is reached or if king is captured.
+    if depth == 0 or abs(game_state.value) > 500:
+        if game_state.white_to_play:
+            return game_state.value
+        else:
+            return -game_state.value
+
+    # Test child nodes.
+    moves = game_state.pseudo_legal_moves_no_castlings()
+    value_list = []
+
+    # If no moves were found.
+    if moves == []:
+        return 0
+
+    # Else, return a value based on child node values.
+    best_value = -1000000
+    for move in moves:
+        game_state.make_move(move)
+        new_value = -negamax(game_state, depth-1, -beta, -alpha)
+        game_state.undo_move(move)
+        best_value = max(best_value, new_value)
+        alpha = max(alpha, new_value)
+        if beta <= alpha:
+            break
+    return best_value
 
 def convert_position_to_engine_format(position):
     """Convert conventional position format to engine format.
@@ -1179,29 +1168,15 @@ def computer_move(game_state):
     if moves == []:
         return None
 
-    # If maximizing player.
-    if game_state.white_to_play:
-        alpha = -1000000
-        beta = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            value = minimax_value_alpha_beta_pruning(game_state, depth, alpha, beta)
-            if value > alpha:
-                best_move = move
-                alpha = value
-            game_state.undo_move(move)
-
-    # If minimizing player.
-    else:
-        alpha= -1000000
-        beta = 1000000
-        for move in moves:
-            game_state.make_move(move)
-            value = minimax_value_alpha_beta_pruning(game_state, depth, alpha, beta)
-            if value < beta:
-                best_move = move
-                beta = value
-            game_state.undo_move(move)
+    alpha = -1000000
+    beta = 1000000
+    for move in moves:
+        game_state.make_move(move)
+        value = -negamax(game_state, depth, -beta, -alpha)
+        if value > alpha:
+            best_move = move
+            alpha = value
+        game_state.undo_move(move)
 
     #print(node_counter)
 

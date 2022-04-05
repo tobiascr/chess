@@ -1,6 +1,7 @@
 
 import engine
 import game as game_module
+import simple_engine
 
 def print_board(game):
     print(game.board_value("g2"))
@@ -66,13 +67,13 @@ def print_board(game):
 #FEN_string = "2k5/8/5R2/8/8/8/1K6/8 w - -"
 
 # Forks
-#FEN_string = "4k3/8/8/2K4b/5n2/8/8/2Q5 b - -"
+FEN_string = "4k3/8/8/2K4b/5n2/8/8/2Q5 b - -"
 
 # Promotions
 #FEN_string = "4k2r/P7/8/8/5n2/7b/8/3NK3 w K -"
 #FEN_string = "4k2r/P7/8/8/5n2/7b/6p1/3NK3 b - -"
 #FEN_string = "8/PPP2k2/8/8/8/8/6pp/2K5 w - -" # Multiple promotions
-FEN_string = "8/PPP2k2/8/8/8/8/6pp/2K5 b - -" # Multiple promotions
+#FEN_string = "8/PPP2k2/8/8/8/8/6pp/2K5 b - -" # Multiple promotions
 
 # 50 move rule
 #FEN_string = "8/r7/8/5k2/8/7R/2K5/8 w - - 104 91"
@@ -113,16 +114,16 @@ game_state = engine.GameState(FEN_string)
 game = game_module.Game(FEN_string)
 print(game)
 print("FEN-string:", FEN_string)
-print("Check:", engine.check(FEN_string))
-print("Check mate:", engine.check_mate(FEN_string))
-print("Stale mate:", engine.stale_mate(FEN_string))
+print("Check:", game.check())
+print("Check mate:", game.check_mate())
+print("Stale mate:", game.stale_mate())
 print("Kingside castling possible:", game_state.castling_kingside_possible())
 print("Queenside castling possible:", game_state.castling_queenside_possible())
 print("Insufficient material:", game.insufficient_material())
 print("Draw by the 50 move rule: ", game.possible_draw_by_50_move_rule())
-print("Possible moves:", engine.legal_moves_UCI(FEN_string))
+print("Possible moves:", simple_engine.legal_moves_UCI(FEN_string))
 
-if engine.legal_moves_UCI(FEN_string):
+if simple_engine.legal_moves_UCI(FEN_string):
     move = engine.computer_move_UCI(FEN_string)
     print("Best move found by engine:", move)
 
