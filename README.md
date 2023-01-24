@@ -1,5 +1,5 @@
 
-The code in this repository is programmed in Python 3.7.3 using the standard library.
+The code in this repository is programmed in Python 3.9.2 using the standard library.
 
 To play chess with a graphical user inteface, run
 
