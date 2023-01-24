@@ -820,7 +820,8 @@ class GameState:
         """Return a list of Move-objects corresponding to all possible pseudo-legal moves
         in this position, except for castlings and promotion to other pieces than
         queens. The moves are sorted in such a way that the capture moves are preceding
-        the non capture moves."""
+        the non capture moves.
+        """
         capture_move_list = []
         non_capture_move_list = []
         for position in range(64):
@@ -847,11 +848,39 @@ class GameState:
 
         return capture_move_list + non_capture_move_list
 
+    def pseudo_legal_captures(self):
+        """Return a list of Move-objects corresponding to all possible pseudo-legal captures
+        in this position, except for promotion to other pieces than queens.
+        """
+        capture_move_list = []
+        for position in range(64):
+            piece = self.board[position]
+            # If there is a piece.
+            if piece:
+                # If the piece have the right color.
+                if piece.white == self.white_to_play:
+                    (c_move_list, non_c_move_list) = piece.possible_moves(self, position)
+                    capture_move_list += c_move_list
+
+        # The capture moves are sorted so that moves where the captured
+        # piece have a higher absolute value than the capturing piece are
+        # prioritized.
+        def value_difference(capture_move):
+            if len(capture_move.change_list) > 2:
+                return 0
+            for triple in capture_move.change_list:
+                if triple[2] != None:
+                    return abs(triple[1].value) - abs(triple[2].value)
+
+        capture_move_list.sort(key=value_difference, reverse=True)
+
+        return capture_move_list
 
     def legal_moves_no_castlings(self):
         """Return a list of Move-objects corresponding to all possible legal moves
         in this position, except for castlings and promotion to other pieces than
-        queens."""
+        queens.
+        """
         move_list = []
         moves = self.pseudo_legal_moves_no_castlings()
         for move in moves:
@@ -864,7 +893,8 @@ class GameState:
     def castlings(self):
         """Return a list of Move-objects corresponding to all possible castlings
         in this position. It is assumed that no moves have been made to the game state
-        for while using this method."""
+        for while using this method.
+        """
         move_list = []
         if self.castling_kingside_possible():
             if self.white_to_play:
@@ -1125,6 +1155,53 @@ def negamax(game_state, depth, alpha, beta):
             break
     return best_value
 
+def negamax_with_quiescence(game_state, depth, alpha, beta):
+    """Compute a value of game_state. The value is seen from the perspective of the
+    player in turn. A favorable position for that player is given a positive value.
+    """
+
+    #global node_counter
+    #node_counter += 1
+
+    # If the king is captured.
+    if abs(game_state.value) > 500:
+        if game_state.white_to_play:
+            return game_state.value
+        else:
+            return -game_state.value
+
+    # Test child nodes.
+    if depth > 0:
+        moves = game_state.pseudo_legal_moves_no_castlings()
+        # If no moves were found.
+        if moves == []:
+            return 0
+    elif depth > -1: # Quiescence
+        moves = game_state.pseudo_legal_captures()
+        # If no moves were found.
+        if moves == []:
+            if game_state.white_to_play:
+                return game_state.value
+            else:
+                return -game_state.value
+    else:
+        if game_state.white_to_play:
+            return game_state.value
+        else:
+            return -game_state.value
+
+    # Else, return a value based on child node values.
+    best_value = -1000000
+    for move in moves:
+        game_state.make_move(move)
+        new_value = -negamax_with_quiescence(game_state, depth-1, -beta, -alpha)
+        game_state.undo_move(move)
+        best_value = max(best_value, new_value)
+        alpha = max(alpha, new_value)
+        if beta <= alpha:
+            break
+    return best_value
+
 def convert_position_to_engine_format(position):
     """Convert conventional position format to engine format.
     position can be for example "a1". For example "a1" is converted to 0.
@@ -1155,9 +1232,9 @@ def computer_move(game_state):
             number_of_pieces += 1
 
     if number_of_pieces > 15:
-        depth = 3
+        depth = 2
     else:
-        depth = 4
+        depth = 3
 
     best_move = None
 
@@ -1172,7 +1249,7 @@ def computer_move(game_state):
     beta = 1000000
     for move in moves:
         game_state.make_move(move)
-        value = -negamax(game_state, depth, -beta, -alpha)
+        value = -negamax_with_quiescence(game_state, depth, -beta, -alpha)
         if value > alpha:
             best_move = move
             alpha = value
