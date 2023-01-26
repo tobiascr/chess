@@ -251,6 +251,18 @@ def new_game(FEN_string):
         board.reset_highlight()
         board.update_squares()
         board.rebind_mouse()
+        if game.check_mate():
+            status_bar.set_text("Computer win! Check mate.")
+            return
+        if game.stale_mate():
+            status_bar.set_text("Stale mate")
+            return
+        if game.insufficient_material():
+            status_bar.set_text("Draw by insufficient material.")
+            return
+        if game.possible_draw_by_50_move_rule():
+            status_bar.set_text("Draw by the 50 move rule.")
+            return
         status_bar.set_text("Your turn")
 
 def new_game_white():
