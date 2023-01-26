@@ -1238,9 +1238,9 @@ def computer_move(game_state):
 
     best_move = None
 
-    # The move order is randomized in order to make opening move
-    # selection more natural.
-    random.shuffle(moves)
+    # The move order is randomized in the early stage of the game.
+    if number_of_pieces > 20:
+        random.shuffle(moves)
 
     if moves == []:
         return None
