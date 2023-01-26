@@ -1,5 +1,7 @@
 
 import tkinter as tk
+from tkinter import simpledialog
+
 from game import Game
 
 
@@ -228,32 +230,52 @@ class StatusBar(tk.Label):
     def set_text(self, new_text):
         self.config(text=new_text)
 
+def new_game(FEN_string):
+    global game
+    if player_is_white:
+        board.set_normal_orientation()
+    else:
+        board.set_upside_down_orientation()
+    if ("w" in FEN_string and player_is_white) or ("w" not in FEN_string and not player_is_white):
+        game = Game(FEN_string)
+        board.reset_highlight()
+        board.update_squares()
+        board.rebind_mouse()
+        status_bar.set_text("Your turn")
+    else:
+        game = Game(FEN_string)
+        status_bar.set_text("Thinking..")
+        root.update_idletasks()
+        move = game.computer_move()
+        game.make_move(move)
+        board.reset_highlight()
+        board.update_squares()
+        board.rebind_mouse()
+        status_bar.set_text("Your turn")
 
 def new_game_white():
     global player_is_white
     player_is_white = True
-    global game
-    game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-    board.set_normal_orientation()
-    board.reset_highlight()
-    board.update_squares()
-    board.rebind_mouse()
-    status_bar.set_text("Your turn")
+    new_game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
 
 def new_game_black():
     global player_is_white
     player_is_white = False
-    global game
-    game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
-    status_bar.set_text("Thinking..")
-    root.update_idletasks()
-    move = game.computer_move()
-    game.make_move(move)
-    board.set_upside_down_orientation()
-    board.reset_highlight()
-    board.update_squares()
-    board.rebind_mouse()
-    status_bar.set_text("Your turn")
+    new_game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
+
+def new_game_white_from_FEN_position():
+    global player_is_white
+    player_is_white = True
+    FEN_string = simpledialog.askstring("New game", "FEN position:")
+    if FEN_string:
+        new_game(FEN_string)
+
+def new_game_black_from_FEN_position():
+    global player_is_white
+    player_is_white = False
+    FEN_string = simpledialog.askstring("New game", "FEN position:")
+    if FEN_string:
+        new_game(FEN_string)
 
 game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -")
 
@@ -296,6 +318,8 @@ menubar = tk.Menu(root, relief="flat", borderwidth=0)
 menu = tk.Menu(menubar, tearoff=0)
 menu.add_command(label="New game - white", command=new_game_white)
 menu.add_command(label="New game - black", command=new_game_black)
+menu.add_command(label="New game - white from FEN position", command=new_game_white_from_FEN_position)
+menu.add_command(label="New game - black from FEN position", command=new_game_black_from_FEN_position)
 menu.add_separator()
 menu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="Menu", menu=menu)
